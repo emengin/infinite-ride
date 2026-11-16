@@ -4,6 +4,7 @@ import { ROAD } from '../world/RoadPath.js';
 export class MotorcyclePhysics {
   constructor(path) {
     this.path = path;
+    this.sensitivity = 1;
     this.reset();
   }
 
@@ -21,6 +22,9 @@ export class MotorcyclePhysics {
       offroad: false,
       distance: keepDistance ? old.distance : 0,
       maxSpeed: keepDistance ? old.maxSpeed : 0,
+      nitro: keepDistance ? old.nitro : 1,
+      boosting: false,
+      boostLocked: false,
     };
   }
 
@@ -31,23 +35,34 @@ export class MotorcyclePhysics {
     const grip = st.offroad ? 0.44 : 1;
     const throttle = clamp(input.throttle || 0, 0, 1);
     const brake = clamp(input.brake || 0, 0, 1);
+    if (!input.nitro) st.boostLocked = false;
+    st.boosting =
+      !!input.nitro &&
+      !st.boostLocked &&
+      throttle > 0 &&
+      st.speed > 5 &&
+      !st.offroad &&
+      st.nitro > 0;
+    st.nitro = clamp(st.nitro + (st.boosting ? -0.28 : 0.075) * dt, 0, 1);
+    if (st.nitro === 0) st.boostLocked = true;
     const drag = 0.38 + 0.00105 * st.speed * st.speed;
     const power = 10.2 * (1 - st.speed / 98) * (st.offroad ? 0.38 : 1);
     const slope = Math.sin(frame.pitch) * 9.81;
     st.acceleration =
       throttle * power -
+      (st.boosting ? -8 : 0) -
       brake * 15.5 * (st.offroad ? 0.7 : 1) -
       drag -
       slope -
       (st.offroad ? 2.8 + st.speed * 0.045 : 0);
     // No spontaneous rolling or reversing at standstill.
-    st.speed = clamp(st.speed + st.acceleration * dt, 0, 63);
+    st.speed = clamp(st.speed + st.acceleration * dt, 0, st.boosting ? 73 : Math.max(63, st.speed));
     if (st.speed === 0) st.acceleration = 0;
     st.steer = damp(st.steer, clamp(input.steer || 0, -1, 1), 11, dt);
 
     // Assisted bicycle steering. The base yaw follows the road; player input
     // changes heading before it changes lateral position. Grip limits road yaw.
-    const targetHeading = st.steer * (0.32 / (1 + st.speed / 27));
+    const targetHeading = st.steer * (0.32 / (1 + st.speed / 27)) * this.sensitivity;
     const roadYaw = frame.curvature * st.speed * Math.cos(st.headingError);
     const wantedYaw = roadYaw + (targetHeading - st.headingError) * 3.8;
     const maxYaw = (10.8 * grip) / Math.max(st.speed, 5);

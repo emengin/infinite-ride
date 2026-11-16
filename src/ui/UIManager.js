@@ -37,13 +37,30 @@ export class UIManager {
     bind('result-retry', 'restart');
     bind('result-menu', 'menu');
     bind('end-ride', 'finish');
+    bind('open-settings', 'settings');
+    bind('pause-settings', 'settings');
+    bind('settings-close', 'closeSettings');
+    bind('how-to-play', 'help');
+    bind('help-close', 'closeHelp');
+    document.getElementById('settings-form').addEventListener(
+      'submit',
+      (event) => {
+        event.preventDefault();
+        const form = event.currentTarget,
+          values = {};
+        for (const element of form.elements) if (element.name) values[element.name] = element.value;
+        actions.applySettings(values);
+      },
+      { signal: this.abort.signal },
+    );
     document
-      .querySelectorAll('[data-mode-choice]')
-      .forEach((button) =>
-        button.addEventListener('click', () => actions.selectMode(button.dataset.modeChoice), {
-          signal: this.abort.signal,
-        }),
-      );
+      .getElementById('settings-form')
+      .addEventListener('input', () => this.settingOutputs(), { signal: this.abort.signal });
+    document.querySelectorAll('[data-mode-choice]').forEach((button) =>
+      button.addEventListener('click', () => actions.selectMode(button.dataset.modeChoice), {
+        signal: this.abort.signal,
+      }),
+    );
     document
       .getElementById('reload-button')
       .addEventListener('click', () => window.location.reload(), { signal: this.abort.signal });
@@ -154,8 +171,44 @@ export class UIManager {
     e['surface-label'].textContent = state.offroad ? 'TOPRAK · DÜŞÜK TUTUŞ' : 'ASFALT · İYİ TUTUŞ';
     e['surface-label'].style.color = state.offroad ? '#e9cf88' : '';
     e['camera-label'].textContent = CAMERA_LABELS[camera];
+    document.getElementById('nitro-fill').style.width = `${state.nitro * 100}%`;
+    document.getElementById('nitro-label').textContent = state.boosting
+      ? 'BOOST'
+      : `NITRO · ${Math.round(state.nitro * 100)}%`;
+    document.documentElement.style.setProperty(
+      '--speed-effect',
+      String(Math.max(0, Math.min(0.28, (state.speed - 38) / 110))),
+    );
     if (!e.debug.hidden)
       e.debug.textContent = `INFINITE RIDE / AŞAMA 1\n${stats.fps.toFixed(0)} FPS · ${stats.drawCalls} draw calls\n${stats.triangles.toLocaleString()} triangles\n${stats.chunks} chunks · ${stats.geometries} geometries\n${stats.recycled} chunk fills\ns ${state.s.toFixed(1)} m · d ${state.d.toFixed(2)} m\norigin ${stats.origin} m · seed ${stats.seed}\nheading ${state.headingError.toFixed(3)} · lean ${state.lean.toFixed(3)}`;
+  }
+
+  settings(values, visible, locked = false) {
+    document.getElementById('settings').hidden = !visible;
+    if (!visible) return;
+    const form = document.getElementById('settings-form');
+    for (const element of form.elements)
+      if (element.name) {
+        element.value = values[element.name];
+        element.disabled = locked && ['traffic', 'biome'].includes(element.name);
+      }
+    document.getElementById('settings-lock').hidden = !locked;
+    this.settingOutputs();
+    document.getElementById('settings-close').focus();
+  }
+  settingOutputs() {
+    const form = document.getElementById('settings-form');
+    for (const output of form.querySelectorAll('output')) {
+      const value = Number(form.elements[output.dataset.for].value);
+      output.textContent =
+        output.dataset.for === 'sensitivity'
+          ? `${value.toFixed(1)}×`
+          : `${Math.round(value * 100)}%`;
+    }
+  }
+  help(visible) {
+    document.getElementById('help').hidden = !visible;
+    if (visible) document.getElementById('help-close').focus();
   }
 
   toast(message) {

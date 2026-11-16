@@ -1,6 +1,6 @@
 # INFINITE RIDE — Proje Durumu
 
-Son güncelleme: **16 Kasım 2026**. **Aşama 1–3 tamamlandı. Aşama 4 işlevsel; son regresyon kontrolünde.**
+Son güncelleme: **16 Kasım 2026**. **Aşama 1–4 tamamlandı. Aşama 5 işlevsel ve regresyonları geçti; Aşama 6 son kalite kontrolü sırada.**
 
 ## Çalışma kuralı
 
@@ -64,3 +64,7 @@ Sedan, hatchback, SUV, spor otomobil, kamyon, otobüs ve motosiklet için özgü
 ## Aşama 4 kaydı
 
 Free Ride, Traffic Rush ve Race menüden seçilip gerçekten oynanır. Rush mesafe/hız/karşı şerit/sollama/yakın geçiş puanları, süreli combo, çarpışmada sonuç ve LocalStorage rekoru içerir. Race 3 saniyelik geri sayım, üç farklı AI sürücü, aynı yol/fizikte 3 km yarış, 750 m kontrol noktaları, üç boyutlu kapı/bitiş, süre, sıralama ve sonuç/yeniden deneme içerir. Yarışçı ve trafik AI birbirini hesaba katar. Serbest sürüş duraklatmadan bitirilip özetlenebilir. Kayıt erişimi kapalı/bozuksa oyun sürer. 4 yeni Node testi, 6 mod tarayıcı senaryosu (1.5 km üzeri serbest sürüş ve 3 km yarışın hızlandırılmış tam bitişi dahil) geçti. Sonraki: Aşama 5 ses, gün/gece, gerçek ayarlar, nitro ve polish.
+
+## Aşama 5 kaydı
+
+Kullanıcı etkileşiminden sonra açılan Web Audio motor/rüzgâr/trafik/fren, yakın geçiş/kaza/menü/kontrol noktası efektleri; ses ayarı ve duraklatmada sürüş sesinin susması eklendi. Sesler özgün sentezdir, harici kayıt kullanılmaz. Gün doğumu/gündüz/gün batımı/gece ve 12 dakikalık yumuşak dinamik döngü; gökyüzü/güneş/gölge/sis renkleri; gerçek motosiklet spot farı ve yakındaki araçlar için dört adet yeniden kullanılan ışık var. Klavye/dokunmatik nitro, gerçek hız desteği, yakıt boşalması/yenilenmesi, gösterge; kamera FOV/ivme/darbe tepkisi; motosiklette canlı dijital kokpit eklendi. Grafik/çözünürlük, kamera, kontrol hassasiyeti, trafik, biyom, saat, hava ve ses ayarları gerçek sistemlere bağlı ve saklanır. Orta/düşük kalite ve uyarlanan çözünürlük desteği var. 28 Node testi, 21 sürüş, 6 mod ve 8 polish Chromium kontrolü geçti. Gece/kask, dört saat ve ayar ekranları incelendi. Son aşamada uzun süre, kaynak temizliği, mobil, alt yol ve paket doğrulanacak.

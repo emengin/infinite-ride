@@ -11,10 +11,13 @@ import { seedFromString } from './math.js';
 import { TrafficManager } from '../traffic/TrafficManager.js';
 import { CollisionSystem } from '../physics/CollisionSystem.js';
 import { createTestDriver } from './TestDriver.js';
-import { SaveManager } from './SaveManager.js';
+import { SaveManager, normalizeSettings } from './SaveManager.js';
 import { SessionManager, MODES } from '../modes/SessionManager.js';
 import { RaceManager } from '../modes/RaceManager.js';
 import { RaceRenderer } from '../modes/RaceRenderer.js';
+import { AudioManager } from '../audio/AudioManager.js';
+import { TimeOfDay } from '../world/TimeOfDay.js';
+import { PerformanceManager } from './PerformanceManager.js';
 
 export class Game {
   constructor(canvas) {
@@ -26,17 +29,26 @@ export class Game {
     const query = new URLSearchParams(location.search),
       seedText = query.get('seed');
     const seed = seedText === null ? 7049 : seedFromString(seedText);
-    this.path = new RoadPath(seed, query.get('biome') || 'auto');
+    this.save = new SaveManager();
+    this.settings = this.save.settings();
+    for (const key of ['biome', 'traffic', 'time'])
+      if (query.has(key)) this.settings[key] = query.get(key);
+    this.settings = normalizeSettings(this.settings);
+    this.audio = new AudioManager();
+    this.audio.volume = this.settings.volume;
+    this.time = new TimeOfDay(this.settings.time);
+    this.performance = new PerformanceManager(this.renderer);
+    this.performance.apply(this.settings);
+    this.path = new RoadPath(seed, this.settings.biome);
     this.world = new WorldManager(this.renderer.scene, this.path);
     this.physics = new MotorcyclePhysics(this.path);
     this.traffic = new TrafficManager(
       this.renderer.scene,
       this.path,
       this.world,
-      query.get('traffic') || 'medium',
+      this.settings.traffic,
     );
     this.collisions = new CollisionSystem();
-    this.save = new SaveManager();
     this.session = new SessionManager();
     this.playMode = query.get('mode') in MODES ? query.get('mode') : 'free';
     this.race = new RaceManager(this.path);
@@ -45,6 +57,8 @@ export class Game {
     this.motorcycle = new MotorcycleModel();
     this.renderer.scene.add(this.motorcycle.root);
     this.camera = new CameraController(this.renderer.camera, this.path, this.world);
+    this.camera.mode = this.settings.camera;
+    this.physics.sensitivity = this.settings.sensitivity;
     this.fixed = new FixedStep();
     this.input = new InputManager((action) => this.action(action));
     this.ui = new UIManager({
@@ -57,6 +71,14 @@ export class Game {
       recover: () => this.recover(),
       selectMode: (value) => this.selectMode(value),
       finish: () => this.finish('ended'),
+      settings: () => this.openSettings(),
+      closeSettings: () => this.closeSettings(),
+      applySettings: (values) => {
+        this.applySettings(values);
+        this.closeSettings();
+      },
+      help: () => this.ui.help(true),
+      closeHelp: () => this.ui.help(false),
     });
     this.selectMode(this.playMode);
     document.getElementById('biome-select').value = this.path.biomes.choice;
@@ -65,14 +87,13 @@ export class Game {
       .getElementById('traffic-select')
       .addEventListener(
         'change',
-        (event) => this.traffic.simulation.setDensity(event.target.value, this.physics.state.s),
+        (event) => this.applySettings({ ...this.settings, traffic: event.target.value }),
         { signal: this.ui.abort.signal },
       );
     document.getElementById('biome-select').addEventListener(
       'change',
       (event) => {
-        this.camera.rebase(this.world.setBiome(event.target.value, this.physics.state.s));
-        this.camera.initialized = false;
+        this.applySettings({ ...this.settings, biome: event.target.value });
       },
       { signal: this.ui.abort.signal },
     );
@@ -133,6 +154,9 @@ export class Game {
     this.ui.mode(mode);
   }
   start() {
+    void this.audio.start();
+    this.audio.effect('menu');
+    this.result = null;
     this.physics.reset();
     this.session.reset(this.playMode);
     this.race.reset(this.physics.state.s);
@@ -150,6 +174,14 @@ export class Game {
     this.setMode('intro');
   }
   action(action) {
+    if (action === 'pause' && !document.getElementById('settings').hidden) {
+      this.closeSettings();
+      return;
+    }
+    if (action === 'pause' && !document.getElementById('help').hidden) {
+      this.ui.help(false);
+      return;
+    }
     if (action === 'pause' && ['running', 'paused', 'countdown'].includes(this.mode)) {
       if (this.mode === 'paused') this.setMode(this.resumeMode || 'running');
       else {
@@ -159,6 +191,8 @@ export class Game {
     }
     if (action === 'camera' && this.mode !== 'intro') {
       this.camera.cycle();
+      this.settings.camera = this.camera.mode;
+      this.save.write('settings', this.settings);
       this.ui.toast(CAMERA_LABELS_TURKISH[this.camera.mode]);
     }
     if (action === 'recover' && ['running', 'crashed'].includes(this.mode)) this.recover();
@@ -180,29 +214,38 @@ export class Game {
     st.prevD = st.d;
     this.physics.update(dt, input);
     const events = this.traffic.update(dt, st, this.playMode === 'race' ? this.race.actors : []);
-    if (this.playMode === 'race') this.race.update(dt, st, this.traffic.simulation.actors);
+    if (this.playMode === 'race') {
+      const previous = this.race.checkpoint;
+      this.race.update(dt, st, this.traffic.simulation.actors);
+      if (this.race.checkpoint > previous) this.audio.effect('checkpoint');
+    }
     const hit = this.collisions.check(
       st,
       [...this.traffic.simulation.actors, ...(this.playMode === 'race' ? this.race.actors : [])],
       this.world,
     );
-    if (hit && st.speed > 1) {
+    if (hit && (st.speed > 1 || (hit.kind === 'vehicle' && hit.severity > 0.03))) {
       this.rideStats.crashes++;
       this.lastCrash = hit;
+      this.audio.effect('crash');
+      this.camera.impact = 0.4 + hit.severity;
       this.session.collision();
       st.speed = 0;
       if (this.playMode === 'rush') this.finish('crash');
       else this.setMode('crashed');
       this.ui.toast(
-        hit.kind === 'vehicle'
-          ? 'Araçla çarpıştın. R ile yola dön.'
-          : 'Yol kenarına çarptın. R ile yola dön.',
+        this.playMode === 'rush'
+          ? 'Sürüş tamamlandı. Skorun kaydedildi.'
+          : hit.kind === 'vehicle'
+            ? 'Araçla çarpıştın. R ile yola dön.'
+            : 'Yol kenarına çarptın. R ile yola dön.',
       );
       return;
     }
     this.session.update(dt, st, events);
     for (const event of events) {
       if (event.type === 'near') {
+        this.audio.effect('near');
         this.rideStats.near++;
         this.ui.toast(`Yakın geçiş · ${event.clearance.toFixed(2)} m`);
       }
@@ -215,6 +258,45 @@ export class Game {
     this.playMode = value in MODES ? value : 'free';
     this.session.reset(this.playMode);
     this.ui.selectMode(this.playMode);
+  }
+  openSettings() {
+    this.settingsReturnMode = this.mode;
+    if (['running', 'countdown'].includes(this.mode)) {
+      this.resumeMode = this.mode;
+      this.setMode('paused');
+    }
+    this.ui.settings(this.settings, true, this.playMode === 'race' && this.mode !== 'intro');
+  }
+  closeSettings() {
+    this.ui.settings(this.settings, false);
+    if (['running', 'countdown'].includes(this.settingsReturnMode))
+      this.setMode(this.settingsReturnMode);
+  }
+  applySettings(values) {
+    const next = normalizeSettings(values),
+      previous = this.settings;
+    if (this.playMode === 'race' && this.mode !== 'intro') {
+      next.biome = previous.biome;
+      next.traffic = previous.traffic;
+    }
+    if (next.biome !== previous.biome) {
+      this.camera.rebase(this.world.setBiome(next.biome, this.physics.state.s));
+      this.physics.reset(this.physics.state.s, true);
+      this.camera.initialized = false;
+    }
+    if (next.traffic !== previous.traffic)
+      this.traffic.simulation.setDensity(next.traffic, this.physics.state.s);
+    this.settings = next;
+    this.time.choice = next.time;
+    this.audio.volume = next.volume;
+    this.physics.sensitivity = next.sensitivity;
+    this.camera.mode = next.camera;
+    this.camera.initialized = false;
+    this.performance.apply(next);
+    document.getElementById('biome-select').value = next.biome;
+    document.getElementById('traffic-select').value = next.traffic;
+    this.save.write('settings', next);
+    this.audio.effect('menu');
   }
   finish(reason) {
     this.session.finished = true;
@@ -230,9 +312,10 @@ export class Game {
   }
 
   frame(time) {
-    const dt = this.lastTime ? Math.min((time - this.lastTime) / 1000, 0.1) : 1 / 60;
+    const rawDelta = this.lastTime ? (time - this.lastTime) / 1000 : 1 / 60;
+    const dt = Math.min(rawDelta, 0.1);
     this.lastTime = time;
-    this.fps += (1 / Math.max(dt, 0.001) - this.fps) * 0.035;
+    this.fps += (1 / Math.max(rawDelta, 0.001) - this.fps) * 0.035;
     if (this.mode === 'countdown' && this.race.tickCountdown(dt)) this.setMode('running', true);
     const input =
       this.mode === 'running' ? this.input.sample() : { throttle: 0, brake: 0, steer: 0 };
@@ -255,9 +338,27 @@ export class Game {
     if (this.mode !== 'paused') this.camera.update(dt, this.physics, pose, this.mode === 'intro');
     this.traffic.render(this.playMode === 'race' && this.mode !== 'intro' ? this.race.actors : []);
     this.raceRenderer.update(this.race, this.playMode === 'race' && this.mode !== 'intro');
-    this.renderer.render(this.motorcycle.root.position);
     const biome = this.path.biomes.sample(this.physics.state.s);
-    this.renderer.environment(biome);
+    const atmosphere = this.time.update(this.mode === 'paused' ? 0 : dt);
+    this.renderer.environment(biome, atmosphere, this.settings.weather);
+    this.renderer.headlights(
+      this.physics.state,
+      pose,
+      this.world,
+      atmosphere.night,
+      this.traffic.simulation.actors,
+      this.settings.quality,
+    );
+    this.motorcycle.materials.lamp.emissiveIntensity = 0.6 + atmosphere.night * 3;
+    this.traffic.factory.materials.head.emissiveIntensity = 0.6 + atmosphere.night * 3;
+    this.renderer.render(this.motorcycle.root.position);
+    this.audio.update(
+      this.physics.state,
+      input,
+      ['running', 'countdown'].includes(this.mode),
+      this.traffic.simulation.actors,
+    );
+    this.performance.update(rawDelta, this.mode === 'running');
     document.getElementById('biome-label').textContent = biome.label;
     this.ui.update(this.physics.state, input, this.camera.mode, time, this.stats());
     this.ui.session(
@@ -282,11 +383,19 @@ export class Game {
       seed: this.path.seed,
       traffic: this.traffic.simulation.actors.length,
       trafficPool: this.traffic.simulation.pool.length,
+      pixelRatio: this.renderer.webgl.getPixelRatio(),
     };
   }
   snapshot() {
     return {
       mode: this.mode,
+      settings: { ...this.settings },
+      audio: this.audio.snapshot(),
+      atmosphere: {
+        time: this.time.choice,
+        night: this.time.sample().night,
+        headlight: this.renderer.headlight.intensity,
+      },
       playMode: this.playMode,
       session: { score: this.session.score, combo: this.session.combo, time: this.session.time },
       race: this.playMode === 'race' ? this.race.snapshot(this.physics.state) : null,
@@ -321,6 +430,7 @@ export class Game {
     this.raceRenderer.dispose();
     this.motorcycle.dispose();
     this.renderer.dispose();
+    this.audio.dispose();
     delete window.__ride;
   }
 }

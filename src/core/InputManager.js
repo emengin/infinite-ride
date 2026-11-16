@@ -20,12 +20,19 @@ export class InputManager {
       'ArrowDown',
       'ArrowLeft',
       'ArrowRight',
+      'ShiftLeft',
+      'ShiftRight',
       ...Object.keys(actions),
     ]);
     window.addEventListener(
       'keydown',
       (event) => {
-        if (!handled.has(event.code) || /INPUT|SELECT|TEXTAREA/.test(event.target.tagName)) return;
+        if (
+          !handled.has(event.code) ||
+          (/INPUT|SELECT|TEXTAREA/.test(event.target.tagName) &&
+            !['Escape', 'F3'].includes(event.code))
+        )
+          return;
         event.preventDefault();
         this.keys.add(event.code);
         if (!event.repeat && actions[event.code]) onAction(actions[event.code]);
@@ -61,6 +68,7 @@ export class InputManager {
     return {
       throttle: +active('throttle', 'KeyW', 'ArrowUp'),
       brake: +active('brake', 'KeyS', 'ArrowDown'),
+      nitro: +active('nitro', 'ShiftLeft', 'ShiftRight'),
       steer: +active('right', 'KeyD', 'ArrowRight') - +active('left', 'KeyA', 'ArrowLeft'),
     };
   }

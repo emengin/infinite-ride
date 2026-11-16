@@ -52,6 +52,13 @@ try {
   assert.equal(near.mode, 'running');
   assert.ok(near.rideStats.near >= 1);
   checks.push('geometric close pass without collision');
+  const incoming = await page.evaluate(() => {
+    window.__ride.test.player({ s: 100, d: -2.3, speed: 0 });
+    window.__ride.test.traffic([{ s: 108, dir: -1, speed: 35 }]);
+    return window.__ride.test.advance(0.5, { throttle: 0 });
+  });
+  assert.equal(incoming.mode, 'crashed');
+  checks.push('incoming vehicle can hit a stationary player');
   assert.equal(errors.length, 0, JSON.stringify(errors));
   await writeFile(
     'artifacts/traffic-results.json',

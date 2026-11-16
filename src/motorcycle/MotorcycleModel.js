@@ -116,6 +116,31 @@ export class MotorcycleModel {
       this.sphere(this.rider, [side * 0.36, 1.18, -0.63], [0.065, 0.055, 0.085], m.black);
     }
     this.pitch = 0;
+    if (typeof document !== 'undefined') {
+      this.instrumentCanvas = document.createElement('canvas');
+      this.instrumentCanvas.width = 256;
+      this.instrumentCanvas.height = 128;
+      this.instrumentContext = this.instrumentCanvas.getContext('2d');
+      this.instrumentTexture = new THREE.CanvasTexture(this.instrumentCanvas);
+      this.instrumentTexture.colorSpace = THREE.SRGBColorSpace;
+      this.instrumentMaterial = new THREE.MeshBasicMaterial({
+        map: this.instrumentTexture,
+        toneMapped: false,
+      });
+      const geometry = new THREE.PlaneGeometry(0.23, 0.115);
+      this.geometries.add(geometry);
+      this.instrument = this.mesh(
+        body,
+        geometry,
+        this.instrumentMaterial,
+        [0, 1.237, -0.58],
+        null,
+        [-0.65, 0, 0],
+      );
+      this.instrument.castShadow = false;
+      this.instrument.receiveShadow = false;
+      this.lastInstrumentSpeed = -1;
+    }
     // Static pieces sharing paint/metal/etc. render in one call per material.
     // Steering, wheel spin and rider visibility keep their separate transforms.
     for (const group of [
@@ -126,7 +151,7 @@ export class MotorcycleModel {
       this.rider,
       this.body,
     ]) {
-      this.mergeStatic(group, new Set([this.torso]));
+      this.mergeStatic(group, new Set([this.torso, this.instrument]));
     }
   }
 
@@ -257,10 +282,29 @@ export class MotorcycleModel {
     this.head.visible = !helmet;
     this.torso.visible = !helmet;
     this.materials.tail.emissiveIntensity = input.brake ? 3.5 : 0.7;
+    const kmh = Math.round(state.speed * 3.6);
+    if (this.instrumentContext && kmh !== this.lastInstrumentSpeed) {
+      this.lastInstrumentSpeed = kmh;
+      const context = this.instrumentContext;
+      context.fillStyle = '#0b1d20';
+      context.fillRect(0, 0, 256, 128);
+      context.fillStyle = '#d9fa65';
+      context.font = 'bold 68px monospace';
+      context.textAlign = 'center';
+      context.fillText(String(kmh).padStart(3, '0'), 128, 83);
+      context.fillStyle = '#92c0b7';
+      context.font = '18px monospace';
+      context.fillText('IR/600    KM/H', 128, 113);
+      context.fillStyle = '#d9fa65';
+      context.fillRect(20, 12, Math.min(216, kmh), 5);
+      this.instrumentTexture.needsUpdate = true;
+    }
   }
 
   dispose() {
     this.geometries.forEach((g) => g.dispose());
     Object.values(this.materials).forEach((m) => m.dispose());
+    this.instrumentTexture?.dispose();
+    this.instrumentMaterial?.dispose();
   }
 }

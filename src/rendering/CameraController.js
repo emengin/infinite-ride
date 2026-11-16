@@ -15,6 +15,7 @@ export class CameraController {
     this.smoothedLook = new THREE.Vector3();
     this.shift = new THREE.Vector3();
     this.previousPosition = new THREE.Vector3();
+    this.impact = 0;
   }
   cycle() {
     this.mode = (this.mode + 1) % CAMERA_LABELS.length;
@@ -67,7 +68,10 @@ export class CameraController {
       const side = wide ? 2.3 : 0;
       this.target.set(
         p.x - forward.x * distance + right.x * side,
-        p.y + (wide ? 4.6 : 2.55) + (portrait ? 0.5 : 0),
+        p.y +
+          (wide ? 4.6 : 2.55) +
+          (portrait ? 0.5 : 0) -
+          Math.max(-0.1, Math.min(0.1, st.acceleration * 0.009)),
         p.z - forward.z * distance + right.z * side,
       );
       const ahead = this.path.surface(st.s + 8 + st.speed * 0.1, st.d);
@@ -85,13 +89,20 @@ export class CameraController {
     const rate = helmet ? 24 : menu ? 3.2 : 7.5;
     const alpha = this.initialized ? 1 - Math.exp(-rate * dt) : 1;
     this.camera.position.lerp(this.target, alpha);
+    if (this.impact > 0) {
+      this.camera.position.x += Math.sin(performance.now() * 0.07) * this.impact * 0.12;
+      this.camera.position.y += Math.cos(performance.now() * 0.09) * this.impact * 0.07;
+      this.impact = Math.max(0, this.impact - dt * 2.3);
+    }
     this.smoothedLook.lerp(this.look, this.initialized ? 1 - Math.exp(-10 * dt) : 1);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(this.smoothedLook);
     if (helmet) this.camera.rotateZ(st.lean * 0.13);
     const fov = menu
       ? 48
-      : (helmet ? 69 : this.mode === 2 ? 60 : 57) + Math.min(st.speed / 63, 1) * 12;
+      : (helmet ? 69 : this.mode === 2 ? 60 : 57) +
+        Math.min(st.speed / 63, 1) * 12 +
+        (st.boosting ? 3 : 0);
     this.camera.fov = damp(this.camera.fov, fov, 4, dt);
     this.camera.updateProjectionMatrix();
     this.initialized = true;

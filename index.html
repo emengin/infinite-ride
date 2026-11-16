@@ -14,6 +14,7 @@
   <body>
     <canvas id="game" aria-label="INFINITE RIDE üç boyutlu sürüş alanı"></canvas>
     <div class="vignette" aria-hidden="true"></div>
+    <div class="speed-effect" aria-hidden="true"></div>
     <header class="topbar">
       <a class="wordmark" href="./" aria-label="INFINITE RIDE başlangıç"
         ><span class="brand-symbol">//</span> INFINITE<span>RIDE</span></a
@@ -58,6 +59,10 @@
             </select></label
           >
           <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
+          <div class="menu-links">
+            <button id="open-settings">AYARLAR</button><span>/</span
+            ><button id="how-to-play">NASIL OYNANIR</button>
+          </div>
           <div class="intro-meta">
             <span id="mode-description">Yolculuk senin ritminde.</span
             ><span>INFINITE RIDE / 600</span>
@@ -95,6 +100,10 @@
           <div class="speed-value" id="speed">000</div>
           <div class="speed-bar"><i id="speed-bar"></i></div>
           <div class="speed-bottom"><span id="drive-label">HAZIR</span><span>IR / 600</span></div>
+          <div class="nitro-meter">
+            <span id="nitro-label">NITRO · 100%</span><small>SHIFT</small>
+            <div><i id="nitro-fill"></i></div>
+          </div>
         </div>
         <div class="ride-bottom">
           <span class="camera-label"><i></i><span id="camera-label">TAKİP KAMERASI</span></span
@@ -111,6 +120,7 @@
           <p>Hazır olduğunda kaldığın yerden devam et.</p>
           <button class="primary" id="resume-button">SÜRÜŞE DÖN <span>↗</span></button
           ><button class="secondary" id="reset-button">Yeniden başla</button
+          ><button class="secondary" id="pause-settings">Ayarlar</button
           ><button class="secondary" id="end-ride">Yolculuğu bitir</button
           ><button class="text-button" id="menu-button">Başlangıca dön</button>
           <div class="panel-note">
@@ -142,6 +152,7 @@
       </section>
       <pre id="debug" hidden></pre>
       <div id="touch-controls" hidden aria-label="Dokunmatik sürüş kontrolleri">
+        <button data-control="nitro" class="touch-nitro" aria-label="Nitro">NITRO</button>
         <div class="touch-steer">
           <button data-control="left" aria-label="Sola dön">◀</button
           ><button data-control="right" aria-label="Sağa dön">▶</button>
@@ -160,6 +171,123 @@
           <h2>Bir teknik mola.</h2>
           <p id="error-message"></p>
           <button class="primary" id="reload-button">Yeniden yükle <span>↗</span></button>
+        </div>
+      </section>
+      <section
+        class="overlay panel-overlay settings-overlay"
+        id="settings"
+        hidden
+        aria-labelledby="settings-title"
+      >
+        <div class="settings-panel">
+          <div class="settings-heading">
+            <div>
+              <p class="eyebrow">SENİN YOLCULUĞUN</p>
+              <h2 id="settings-title">Ayarlar</h2>
+            </div>
+            <button id="settings-close" class="icon-button" aria-label="Ayarları kapat">×</button>
+          </div>
+          <form id="settings-form">
+            <div class="settings-grid">
+              <label
+                >GRAFİK KALİTESİ<select name="quality">
+                  <option value="low">Düşük</option>
+                  <option value="medium">Orta</option>
+                  <option value="high">Yüksek</option>
+                </select></label
+              >
+              <label
+                >KAMERA<select name="camera">
+                  <option value="0">Takip</option>
+                  <option value="1">Kask</option>
+                  <option value="2">Sinematik</option>
+                </select></label
+              >
+              <label
+                >GÜZERGÂH<select name="biome">
+                  <option value="auto">Keşif · tüm biyomlar</option>
+                  <option value="forest">Forest Road</option>
+                  <option value="coastal">Coastal Road</option>
+                  <option value="mountain">Mountain Pass</option>
+                  <option value="highland">Highland Road</option>
+                </select></label
+              >
+              <label
+                >TRAFİK<select name="traffic">
+                  <option value="off">Kapalı</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="extreme">Extreme</option>
+                </select></label
+              >
+              <label
+                >GÜNÜN SAATİ<select name="time">
+                  <option value="sunrise">Gün doğumu</option>
+                  <option value="day">Gündüz</option>
+                  <option value="sunset">Gün batımı</option>
+                  <option value="night">Gece</option>
+                  <option value="dynamic">Dinamik döngü</option>
+                </select></label
+              >
+              <label
+                >HAVA<select name="weather">
+                  <option value="clear">Açık</option>
+                  <option value="haze">Puslu</option>
+                </select></label
+              >
+              <label
+                >ÇÖZÜNÜRLÜK ÖLÇEĞİ <output data-for="resolution">100%</output
+                ><input name="resolution" type="range" min="0.5" max="1.5" step="0.05"
+              /></label>
+              <label
+                >SES SEVİYESİ <output data-for="volume">45%</output
+                ><input name="volume" type="range" min="0" max="1" step="0.01"
+              /></label>
+              <label
+                >KONTROL HASSASİYETİ <output data-for="sensitivity">1.0×</output
+                ><input name="sensitivity" type="range" min="0.6" max="1.6" step="0.1"
+              /></label>
+            </div>
+            <p class="settings-note" id="settings-lock" hidden>
+              Yarış sırasında güzergâh ve trafik sabit kalır.
+            </p>
+            <p class="settings-note">
+              Güzergâh değişirse motosiklet güvenle sağ şeride alınır. Ayarların bu cihazda
+              saklanır.
+            </p>
+            <button class="primary" type="submit">UYGULA VE DÖN <span>↗</span></button>
+          </form>
+        </div>
+      </section>
+      <section
+        class="overlay panel-overlay settings-overlay"
+        id="help"
+        hidden
+        aria-labelledby="help-title"
+      >
+        <div class="settings-panel help-panel">
+          <p class="eyebrow">YOLA ÇIKMADAN ÖNCE</p>
+          <h2 id="help-title">Ritmini bul.</h2>
+          <p>
+            <kbd>W / ↑</kbd> Gazı basılı tut. <kbd>S / ↓</kbd> Frenle.<br /><kbd>A D / ← →</kbd>
+            Yönel. <kbd>Shift</kbd> Nitro.<br /><kbd>C / V</kbd> Kamera. <kbd>Esc</kbd> Duraklat.
+            <kbd>R</kbd> Kurtar.
+          </p>
+          <p>
+            <strong>Free Ride</strong> — Sonsuz yol, istediğin tempo. Trafiği ve ortamı ayarlardan
+            seç.<br /><strong>Traffic Rush</strong> — Hız, sollama, yakın geçiş ve karşı şeritte
+            risk puan getirir. Combo 7 saniyede söner; kaza sürüşü bitirir.<br /><strong
+              >Race</strong
+            >
+            — Üç rakibe karşı 3 km. Kontrol noktalarını geç ve bitişe ulaş. Kurtarma +3 saniye ceza
+            getirir.
+          </p>
+          <p>
+            Virajdan önce yavaşla. Toprakta tutuş azalır. Nitro gazla birlikte çalışır; bıraktığında
+            yeniden dolar. Dokunmatik cihazda gaz ve yön düğmelerini birlikte kullanabilirsin.
+          </p>
+          <button class="primary" id="help-close">HAZIRIM <span>↗</span></button>
         </div>
       </section>
     </main>

@@ -9,10 +9,39 @@ export const DEFAULT_SETTINGS = {
   biome: 'auto',
   weather: 'clear',
 };
+export function normalizeSettings(value = {}) {
+  const result = { ...DEFAULT_SETTINGS };
+  const choices = {
+    quality: ['low', 'medium', 'high'],
+    traffic: ['off', 'low', 'medium', 'high', 'extreme'],
+    time: ['sunrise', 'day', 'sunset', 'night', 'dynamic'],
+    biome: ['auto', 'forest', 'coastal', 'mountain', 'highland'],
+    weather: ['clear', 'haze'],
+  };
+  for (const [key, values] of Object.entries(choices))
+    if (values.includes(value[key])) result[key] = value[key];
+  for (const [key, min, max] of [
+    ['resolution', 0.5, 1.5],
+    ['volume', 0, 1],
+    ['camera', 0, 2],
+    ['sensitivity', 0.6, 1.6],
+  ]) {
+    const n = Number(value[key]);
+    if (Number.isFinite(n)) result[key] = Math.max(min, Math.min(max, n));
+  }
+  result.camera = Math.round(result.camera);
+  return result;
+}
 export class SaveManager {
-  constructor(storage = globalThis.localStorage) {
-    this.storage = storage;
+  constructor(storage) {
     this.available = true;
+    try {
+      this.storage = storage ?? globalThis.localStorage;
+      if (!this.storage) this.available = false;
+    } catch {
+      this.available = false;
+      this.storage = null;
+    }
   }
   read(key, fallback) {
     try {
@@ -25,6 +54,7 @@ export class SaveManager {
   }
   write(key, value) {
     try {
+      if (!this.storage) return false;
       this.storage?.setItem(`infinite-ride:${key}`, JSON.stringify(value));
       return true;
     } catch {
@@ -34,10 +64,11 @@ export class SaveManager {
   }
   settings() {
     const value = this.read('settings', {});
-    return { ...DEFAULT_SETTINGS, ...(value && typeof value === 'object' ? value : {}) };
+    return normalizeSettings(value && typeof value === 'object' ? value : {});
   }
   record(mode, result) {
-    const records = this.read('records', {}),
+    const raw = this.read('records', {});
+    const records = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {},
       current = records[mode];
     const best =
       mode === 'race'
