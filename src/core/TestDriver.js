@@ -50,5 +50,34 @@ export function createTestDriver(game) {
       game.camera.rebase(game.world.update(game.physics.state.s));
       return game.snapshot();
     },
+    drive(seconds, targetSpeed = 30) {
+      for (let i = 0; i < Math.round(seconds * 120); i++) {
+        if (game.mode !== 'running') break;
+        const st = game.physics.state,
+          curve = Math.max(
+            Math.abs(game.path.frame(st.s + 30).curvature),
+            Math.abs(game.path.frame(st.s + 60).curvature),
+          );
+        let target = Math.min(targetSpeed, Math.sqrt(7 / Math.max(curve, 0.0001)));
+        const actors = [
+          ...game.traffic.simulation.actors,
+          ...(game.playMode === 'race' ? game.race.actors : []),
+        ];
+        for (const a of actors)
+          if (a.s > st.s && Math.abs(a.d - st.d) < a.halfWidth + 0.6)
+            target = Math.min(
+              target,
+              Math.max(0, a.speed * a.dir + (a.s - st.s - a.halfLength - 5) * 0.55),
+            );
+        game.step(1 / 120, {
+          throttle: Math.max(0, Math.min(1, 0.4 + (target - st.speed) * 0.3)),
+          brake: Math.max(0, Math.min(1, (st.speed - target) / 5)),
+          steer: Math.max(-1, Math.min(1, (2.3 - st.d) * 0.65)),
+        });
+        if (i % 120 === 0) game.camera.rebase(game.world.update(st.s));
+      }
+      game.camera.rebase(game.world.update(game.physics.state.s));
+      return game.snapshot();
+    },
   });
 }

@@ -88,12 +88,12 @@ export class TrafficSimulation {
       this.spawned++;
     }
   }
-  update(dt, player) {
+  update(dt, player, extra = []) {
     this.elapsed += dt;
     this.events.length = 0;
     const actors = this.actors;
     const playerActor = { ...player, dir: 1, active: true, halfWidth: 0.36, halfLength: 1.08 };
-    const participants = [...actors, playerActor];
+    const participants = [...actors, ...extra, playerActor];
     for (const a of actors) {
       a.prevS = a.s;
       a.prevD = a.d;
@@ -113,7 +113,7 @@ export class TrafficSimulation {
         a.passing === null &&
         gap < 90 &&
         gap > 14 &&
-        canOvertake(a, leader, actors, playerActor)
+        canOvertake(a, leader, [...actors, ...extra], playerActor)
       ) {
         a.passing = leader.id ?? 'player';
         a.passUntil = this.elapsed + 10;

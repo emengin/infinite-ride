@@ -32,13 +32,13 @@ export class TrafficManager {
   reset(s) {
     this.simulation.reset(s);
   }
-  update(dt, player) {
-    return this.simulation.update(dt, player);
+  update(dt, player, extra = []) {
+    return this.simulation.update(dt, player, extra);
   }
-  render() {
+  render(extra = []) {
     const counts = Array(7).fill(0),
       o = this.world.origin;
-    for (const a of this.simulation.pool) {
+    for (const a of [...this.simulation.pool, ...extra]) {
       if (!a.active) continue;
       const p = this.path.surface(a.s, a.d),
         f = this.path.frame(a.s),

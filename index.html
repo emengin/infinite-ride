@@ -29,6 +29,11 @@
           <p class="eyebrow"><span></span> BİR YOL. SONSUZ OLASILIK.</p>
           <h1 id="intro-title">INFINITE<br /><em>RIDE.</em></h1>
           <p class="tagline">The Road Never Ends.</p>
+          <div class="mode-choices" aria-label="Oyun modu">
+            <button data-mode-choice="free" class="selected">FREE RIDE</button
+            ><button data-mode-choice="rush">TRAFFIC RUSH</button
+            ><button data-mode-choice="race">RACE</button>
+          </div>
           <p class="intro-copy">
             Kontak sende. Önünde kıvrılan bir yol,<br />uzakta tepeler. Sadece sür.
           </p>
@@ -54,7 +59,8 @@
           >
           <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
           <div class="intro-meta">
-            <span>01 — SERBEST SÜRÜŞ</span><span>TRAFİKSİZ · GÜNDÜZ</span>
+            <span id="mode-description">Yolculuk senin ritminde.</span
+            ><span>INFINITE RIDE / 600</span>
           </div>
         </div>
         <div class="intro-bottom">
@@ -64,8 +70,18 @@
       </section>
       <section class="hud" id="hud" hidden aria-label="Sürüş göstergeleri">
         <div class="route-label">
-          <span class="eyebrow">SERBEST SÜRÜŞ</span><strong id="biome-label">Forest Road</strong
+          <span class="eyebrow" id="mode-label">FREE RIDE</span
+          ><strong id="biome-label">Forest Road</strong
           ><span class="route-status" id="surface-label">ASFALT · İYİ TUTUŞ</span>
+        </div>
+        <div class="score-panel" id="score-panel" hidden>
+          <span class="small-label">SKOR</span><strong id="score">0</strong><b id="combo">×1.0</b>
+        </div>
+        <div class="race-panel" id="race-panel" hidden>
+          <span class="small-label">YARIŞ · 3 KM</span><strong id="race-position">1 / 4</strong
+          ><span id="race-time">00:00.00</span>
+          <div class="race-track"><i id="race-progress"></i></div>
+          <small id="checkpoint-label">0 / 3 CHECKPOINT</small>
         </div>
         <div class="journey">
           <span class="small-label">YOLCULUK</span
@@ -95,6 +111,7 @@
           <p>Hazır olduğunda kaldığın yerden devam et.</p>
           <button class="primary" id="resume-button">SÜRÜŞE DÖN <span>↗</span></button
           ><button class="secondary" id="reset-button">Yeniden başla</button
+          ><button class="secondary" id="end-ride">Yolculuğu bitir</button
           ><button class="text-button" id="menu-button">Başlangıca dön</button>
           <div class="panel-note">
             W / ↑ Gaz &nbsp; S / ↓ Fren &nbsp; A D / ← → Yön<br />C / V Kamera &nbsp; R Yola dön
@@ -103,6 +120,17 @@
         </div>
       </section>
       <div class="toast" id="toast" role="status" hidden></div>
+      <div id="countdown" class="countdown" hidden>3</div>
+      <section class="overlay panel-overlay" id="results" hidden aria-labelledby="result-title">
+        <div class="panel results-panel">
+          <p class="eyebrow" id="result-mode">FREE RIDE</p>
+          <h2 id="result-title">İyi yolculuktu.</h2>
+          <div class="result-stats" id="result-stats"></div>
+          <p class="record-label" id="result-record"></p>
+          <button class="primary" id="result-retry">YENİDEN SÜR <span>↗</span></button
+          ><button class="text-button" id="result-menu">Ana menü</button>
+        </div>
+      </section>
       <section class="overlay panel-overlay crash-overlay" id="crash" hidden>
         <div class="panel">
           <p class="eyebrow">BİR SONRAKİ VİRAJDA DAHA SAKİN</p>

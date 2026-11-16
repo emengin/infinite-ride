@@ -1,6 +1,6 @@
 # INFINITE RIDE — Proje Durumu
 
-Son güncelleme: **16 Kasım 2026**. **Aşama 1 ön kontrolü geçti. Aşama 2 tamamlandı; Aşama 3 sırada.**
+Son güncelleme: **16 Kasım 2026**. **Aşama 1–3 tamamlandı. Aşama 4 işlevsel; son regresyon kontrolünde.**
 
 ## Çalışma kuralı
 
@@ -60,3 +60,7 @@ Dört biyom, 450 m yumuşak biyom geçişi, biyoma göre rota/zemin parametreler
 ## Aşama 3 kaydı
 
 Sedan, hatchback, SUV, spor otomobil, kamyon, otobüs ve motosiklet için özgün birleşik geometriler; iki yönlü trafik, dört yoğunluk ve kapalı seçeneği; 56 nesnelik sabit havuz; eğriliğe göre hız, güvenli takip, boş karşı şeritte sollama ve dönüş eklendi. Süpürülmüş yönlü kutular ile oyuncu/araç ve yol kenarı çarpışmaları, görünür kaza ve kurtarma, gövde boyutları üzerinden yakın geçiş ve tek seferlik sollama olayları var. 21 Node testi (10 dakikalık hızlandırılmış trafik dahil), 5 trafik Chromium senaryosu geçti. Araç ve kaza görüntüleri incelendi. `?test=1&debug=1` sadece otomatik test düzenlemesi için ayrı sürücü açar; normal oyunda erişilmez. Sonraki: Aşama 4 modlar, skor ve yarış.
+
+## Aşama 4 kaydı
+
+Free Ride, Traffic Rush ve Race menüden seçilip gerçekten oynanır. Rush mesafe/hız/karşı şerit/sollama/yakın geçiş puanları, süreli combo, çarpışmada sonuç ve LocalStorage rekoru içerir. Race 3 saniyelik geri sayım, üç farklı AI sürücü, aynı yol/fizikte 3 km yarış, 750 m kontrol noktaları, üç boyutlu kapı/bitiş, süre, sıralama ve sonuç/yeniden deneme içerir. Yarışçı ve trafik AI birbirini hesaba katar. Serbest sürüş duraklatmadan bitirilip özetlenebilir. Kayıt erişimi kapalı/bozuksa oyun sürer. 4 yeni Node testi, 6 mod tarayıcı senaryosu (1.5 km üzeri serbest sürüş ve 3 km yarışın hızlandırılmış tam bitişi dahil) geçti. Sonraki: Aşama 5 ses, gün/gece, gerçek ayarlar, nitro ve polish.
