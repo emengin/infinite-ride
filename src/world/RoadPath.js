@@ -1,4 +1,5 @@
 import { lerp, noise, clamp } from '../core/math.js';
+import { BiomeManager } from './BiomeManager.js';
 
 export const ROAD = Object.freeze({
   halfWidth: 4.6,
@@ -19,16 +20,18 @@ export const LATERAL = [
  * Only small coordinates relative to an origin are ever sent to the GPU.
  */
 export class RoadPath {
-  constructor(seed = 7049) {
+  constructor(seed = 7049, biome = 'auto') {
     this.seed = seed;
+    this.biomes = new BiomeManager(biome);
   }
 
   center(s) {
+    const biome = this.biomes.sample(s);
     return {
       x:
         110 * noise(s / 690 + 1.3, this.seed) +
         34 * noise(s / 270 + 5.8, this.seed + 5) +
-        7 * noise(s / 125 + 8.2, this.seed + 7),
+        7 * noise(s / 125 + 8.2, this.seed + 7) * biome.curve,
       y: 17 + 15 * noise(s / 530 + 2.4, this.seed + 13) + 4 * noise(s / 210 + 7.1, this.seed + 11),
       z: -s,
     };
@@ -66,7 +69,19 @@ export class RoadPath {
       noise(s / 140 + distance / 190, this.seed + 22) * 12 +
       noise(s / 60 + d / 80, this.seed + 25) * 3 +
       (distance / 19) * (0.6 + noise(s / 360 + d / 300, this.seed + 31) * 0.55);
-    return roadY + blend * hills;
+    const biome = this.biomes.sample(s);
+    const ridges =
+      (Math.abs(noise(s / 260 + d / 190, this.seed + 81)) * 0.65 + 0.35) *
+      Math.pow(distance / 25, 0.85);
+    const mountain = roadY + blend * (hills * 0.65 + ridges * 14);
+    const ordinary = roadY + blend * hills;
+    const land = lerp(ordinary, mountain, biome.mountain);
+    // The right-hand coast descends to a seabed; the left is a rocky headland.
+    const coast =
+      d > 0
+        ? lerp(roadY, -12, Math.min(1, (distance - ROAD.shoulder) / 38))
+        : roadY + blend * (hills + distance * 0.12);
+    return lerp(land, coast, biome.coast);
   }
 
   vertex(s, d) {

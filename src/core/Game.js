@@ -19,7 +19,7 @@ export class Game {
     const query = new URLSearchParams(location.search),
       seedText = query.get('seed');
     const seed = seedText === null ? 7049 : seedFromString(seedText);
-    this.path = new RoadPath(seed);
+    this.path = new RoadPath(seed, query.get('biome') || 'auto');
     this.world = new WorldManager(this.renderer.scene, this.path);
     this.physics = new MotorcyclePhysics(this.path);
     this.motorcycle = new MotorcycleModel();
@@ -35,6 +35,15 @@ export class Game {
       menu: () => this.mainMenu(),
       camera: () => this.action('camera'),
     });
+    document.getElementById('biome-select').value = this.path.biomes.choice;
+    document.getElementById('biome-select').addEventListener(
+      'change',
+      (event) => {
+        this.camera.rebase(this.world.setBiome(event.target.value, this.physics.state.s));
+        this.camera.initialized = false;
+      },
+      { signal: this.ui.abort.signal },
+    );
     this.abort = new AbortController();
     document.addEventListener(
       'visibilitychange',
@@ -130,6 +139,9 @@ export class Game {
     );
     if (this.mode !== 'paused') this.camera.update(dt, this.physics, pose, this.mode === 'intro');
     this.renderer.render(this.motorcycle.root.position);
+    const biome = this.path.biomes.sample(this.physics.state.s);
+    this.renderer.environment(biome);
+    document.getElementById('biome-label').textContent = biome.label;
     this.ui.update(this.physics.state, input, this.camera.mode, time, this.stats());
     this.frameId = requestAnimationFrame(this.frame);
   }

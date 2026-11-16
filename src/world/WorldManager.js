@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ROAD } from './RoadPath.js';
 import { RoadGenerator } from './RoadGenerator.js';
 import { TerrainGenerator } from './TerrainGenerator.js';
+import { RoadFurniture } from './RoadFurniture.js';
 
 export class WorldManager {
   constructor(scene, path) {
@@ -9,6 +10,7 @@ export class WorldManager {
     this.path = path;
     this.road = new RoadGenerator(path);
     this.terrain = new TerrainGenerator(path);
+    this.furniture = new RoadFurniture(path);
     this.origin = { x: 0, y: 0, z: 0, s: NaN };
     this.chunks = [];
     this.recycled = 0;
@@ -16,9 +18,10 @@ export class WorldManager {
       const group = new THREE.Group(),
         road = this.road.create(),
         terrain = this.terrain.create();
-      group.add(terrain, road);
+      const furniture = this.furniture.create();
+      group.add(terrain, road, furniture);
       scene.add(group);
-      this.chunks.push({ index: null, group, road, terrain, anchor: null });
+      this.chunks.push({ index: null, group, road, terrain, furniture, anchor: null });
     }
     this.update(24);
   }
@@ -48,6 +51,7 @@ export class WorldManager {
       chunk.anchor = this.path.center(next * ROAD.chunkLength);
       this.road.rebuild(chunk.road, next * ROAD.chunkLength, chunk.anchor);
       this.terrain.rebuild(chunk.terrain, next * ROAD.chunkLength, chunk.anchor);
+      this.furniture.rebuild(chunk.furniture, next * ROAD.chunkLength, chunk.anchor);
       this.recycled++;
     }
     // CPU meshes retain their small chunk-local coordinates. A rebase only moves groups.
@@ -63,6 +67,15 @@ export class WorldManager {
     return target.set(p.x - this.origin.x, p.y - this.origin.y, p.z - this.origin.z);
   }
 
+  setBiome(choice, s) {
+    this.path.biomes.set(choice);
+    this.chunks.forEach((c) => {
+      c.index = null;
+    });
+    this.origin.s = NaN;
+    return this.update(s);
+  }
+
   dispose() {
     for (const chunk of this.chunks) {
       chunk.group.traverse((object) => {
@@ -74,5 +87,6 @@ export class WorldManager {
     }
     this.road.dispose();
     this.terrain.dispose();
+    this.furniture.dispose();
   }
 }

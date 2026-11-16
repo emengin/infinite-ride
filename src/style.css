@@ -7,6 +7,24 @@
   --lime: #d9fa65;
   --muted: #a5ada7;
 }
+.biome-choice {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  margin: 0 0 20px;
+  color: #d0dacc;
+}
+select {
+  font: inherit;
+  background: #18251ee0;
+  color: #f3f3e9;
+  border: 1px solid #ffffff40;
+  padding: 10px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
 * {
   box-sizing: border-box;
 }

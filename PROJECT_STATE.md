@@ -1,10 +1,10 @@
 # INFINITE RIDE — Proje Durumu
 
-Son güncelleme: **16 Kasım 2026**. Sürüm **0.1.0**. **Aşama 1 — Oynanabilir çekirdek tamamlandı; kullanıcı incelemesi bekleniyor.**
+Son güncelleme: **16 Kasım 2026**. **Aşama 1 ön kontrolü geçti. Aşama 2 tamamlandı; Aşama 3 sırada.**
 
 ## Çalışma kuralı
 
-Kullanıcı oyunu inceleyip açıkça devam demeden sonraki aşamaya geçilmez. Her aşama aynı dosyalarda ilerler; çalışan mekanikler korunur, uygulama çalıştırılır, mümkün testler yapılır, bu dosya güncellenir ve Git kullanılıyorsa anlamlı yerel commit oluşturulur. Aşama 2 başlatılmadı.
+Kullanıcı 16 Kasım 2026 tarihli yeni talimatıyla Aşama 2–6 için önceden devam onayı verdi. Her aşama aynı dosyalarda ilerler; kritik testler geçmeden sonraki aşamaya geçilmez. Çalışan mekanikler korunur, uygulama çalıştırılır, mümkün testler yapılır, bu dosya güncellenir ve her kararlı aşama yerel commit ile kaydedilir. Harici yayınlama bu yetkinin kapsamında değildir.
 
 Özgün uzun vadeli ürün tanımı `docs/PROJECT_BRIEF.md` içinde korunmuştur. Bu belgedeki tüm oyun hedefleri birden uygulanmaz; kullanıcının aşama sınırlaması ve bu durum dosyası esas alınır.
 
@@ -52,3 +52,7 @@ Yerel Git deposu `main` dalında tutulur. Aşama 1 commit mesajı: `feat(core): 
 **Aşama 2 / Dünya kalitesi:** mevcut yolu ve fizik testlerini koruyarak orman/dağ ortamı, biyom sistemi, yol tabelaları, bariyerler, atmosfer, materyal/ışık ve model iyileştirmeleri.
 
 Sonraki aşamalar: 3 trafik/çarpışma/sollama; 4 oyun modları; 5 ses/gün-gece/polish; 6 kapsamlı son test ve teslim. Kullanıcı kapsamı değiştirmedikçe bu sıra korunur.
+
+## Aşama 2 kaydı
+
+Dört biyom, 450 m yumuşak biyom geçişi, biyoma göre rota/zemin parametreleri, kıyı denizi ve kayalıkları, dağ kütleleri, yoğun çam/karma orman, yaylalar, instanced çalı/ot/kaya, bariyer, reflektör ve viraj uyarı levhaları eklendi. Güzergâh başlangıç ekranından veya `?biome=forest|coastal|mountain|highland` ile seçilir. Yol/fizik ortak yüzeyi korunur. 15 Node testi ve dört biyom Chromium render/konsol kontrolü geçti; dört biyomun görüntüleri incelendi. Aşama 1'in 21 tarayıcı kontrolü de ön kontrolde geçti. Parça havuzu 50 km testinde sınırlı kalıyor. Henüz trafik veya ses yok; Aşama 3 başlıyor.

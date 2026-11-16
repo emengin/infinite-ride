@@ -18,7 +18,7 @@
       <a class="wordmark" href="./" aria-label="INFINITE RIDE başlangıç"
         ><span class="brand-symbol">//</span> INFINITE<span>RIDE</span></a
       >
-      <div class="stage-tag"><i></i> AŞAMA 01 <span> / OYNANABİLİR ÇEKİRDEK</span></div>
+      <div class="stage-tag"><i></i> INFINITE RIDE <span> / THE ROAD NEVER ENDS.</span></div>
       <button class="icon-button" id="pause-button" aria-label="Duraklat" title="Duraklat · Esc">
         Ⅱ
       </button>
@@ -32,6 +32,16 @@
           <p class="intro-copy">
             Kontak sende. Önünde kıvrılan bir yol,<br />uzakta tepeler. Sadece sür.
           </p>
+          <label class="biome-choice"
+            >GÜZERGÂH
+            <select id="biome-select" aria-label="Biyom">
+              <option value="auto">Keşif · tüm biyomlar</option>
+              <option value="forest">Forest Road</option>
+              <option value="coastal">Coastal Road</option>
+              <option value="mountain">Mountain Pass</option>
+              <option value="highland">Highland Road</option>
+            </select></label
+          >
           <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
           <div class="intro-meta">
             <span>01 — SERBEST SÜRÜŞ</span><span>TRAFİKSİZ · GÜNDÜZ</span>
@@ -44,7 +54,7 @@
       </section>
       <section class="hud" id="hud" hidden aria-label="Sürüş göstergeleri">
         <div class="route-label">
-          <span class="eyebrow">SERBEST SÜRÜŞ</span><strong>Açık tepeler</strong
+          <span class="eyebrow">SERBEST SÜRÜŞ</span><strong id="biome-label">Forest Road</strong
           ><span class="route-status" id="surface-label">ASFALT · İYİ TUTUŞ</span>
         </div>
         <div class="journey">

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BIOMES } from '../world/BiomeManager.js';
 
 export class Renderer {
   constructor(canvas) {
@@ -14,10 +15,11 @@ export class Renderer {
     this.webgl.shadowMap.type = THREE.PCFSoftShadowMap;
     this.webgl.outputColorSpace = THREE.SRGBColorSpace;
     this.webgl.toneMapping = THREE.ACESFilmicToneMapping;
-    this.webgl.toneMappingExposure = 1.12;
+    this.webgl.toneMappingExposure = 1.0;
     this.camera = new THREE.PerspectiveCamera(57, 1, 0.08, 1600);
 
-    this.scene.add(new THREE.HemisphereLight(0xd6e8e0, 0x6a7052, 2.2));
+    this.hemi = new THREE.HemisphereLight(0xd6e8e0, 0x6a7052, 1.7);
+    this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xffe5ae, 3.0);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(1024, 1024);
@@ -37,18 +39,24 @@ export class Renderer {
       new THREE.ShaderMaterial({
         side: THREE.BackSide,
         depthWrite: false,
-        uniforms: {},
+        uniforms: {
+          skyTop: { value: new THREE.Color(0x64a8bd) },
+          skyHorizon: { value: new THREE.Color(0xd5debd) },
+          sunDirection: { value: new THREE.Vector3(-0.6, 0.35, -0.65) },
+          sunTint: { value: new THREE.Color(0xffdf9b) },
+        },
         vertexShader:
           'varying vec3 vDirection; void main(){vDirection=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
         fragmentShader: `
         varying vec3 vDirection;
+        uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 sunDirection; uniform vec3 sunTint;
         float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
         float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
         void main(){
           vec3 d=normalize(vDirection);
-          vec3 color=mix(vec3(.84,.87,.74),vec3(.29,.59,.68),pow(max(d.y,0.0),.48));
-          float sun=pow(max(dot(d,normalize(vec3(-.6,.35,-.65))),0.0),520.0);
-          color+=vec3(1.0,.65,.27)*sun*2.0;
+          vec3 color=mix(skyHorizon,skyTop,pow(max(d.y,0.0),.48));
+          float sun=pow(max(dot(d,normalize(sunDirection)),0.0),520.0);
+          color+=sunTint*sun*2.0;
           vec2 uv=d.xz/max(.08,d.y)*1.8;
           float cloud=noise(uv)*.6+noise(uv*2.0)*.3+noise(uv*4.0)*.1;
           cloud=smoothstep(.58,.77,cloud)*smoothstep(.07,.24,d.y)*.38;
@@ -70,6 +78,22 @@ export class Renderer {
     };
     window.addEventListener('resize', this.resize);
     this.resize();
+    this.fogPalette = BIOMES.map((b) => new THREE.Color(b.fog));
+    this.blendedColor = new THREE.Color();
+  }
+
+  environment(biome) {
+    const color = this.blendedColor;
+    color.setRGB(0, 0, 0);
+    biome.weights.forEach((w, i) => {
+      color.r += this.fogPalette[i].r * w;
+      color.g += this.fogPalette[i].g * w;
+      color.b += this.fogPalette[i].b * w;
+    });
+    this.scene.fog.color.copy(color);
+    this.sky.material.uniforms.skyHorizon.value.copy(color);
+    this.scene.fog.near = 120 - biome.trees * 45;
+    this.scene.fog.far = 930 - biome.trees * 170;
   }
 
   render(position) {
