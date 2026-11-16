@@ -55,4 +55,8 @@ Sonraki aşamalar: 3 trafik/çarpışma/sollama; 4 oyun modları; 5 ses/gün-gec
 
 ## Aşama 2 kaydı
 
-Dört biyom, 450 m yumuşak biyom geçişi, biyoma göre rota/zemin parametreleri, kıyı denizi ve kayalıkları, dağ kütleleri, yoğun çam/karma orman, yaylalar, instanced çalı/ot/kaya, bariyer, reflektör ve viraj uyarı levhaları eklendi. Güzergâh başlangıç ekranından veya `?biome=forest|coastal|mountain|highland` ile seçilir. Yol/fizik ortak yüzeyi korunur. 15 Node testi ve dört biyom Chromium render/konsol kontrolü geçti; dört biyomun görüntüleri incelendi. Aşama 1'in 21 tarayıcı kontrolü de ön kontrolde geçti. Parça havuzu 50 km testinde sınırlı kalıyor. Henüz trafik veya ses yok; Aşama 3 başlıyor.
+Dört biyom, 450 m yumuşak biyom geçişi, biyoma göre rota/zemin parametreleri, kıyı denizi ve kayalıkları, dağ kütleleri, yoğun çam/karma orman, yaylalar, instanced çalı/ot/kaya, bariyer, reflektör ve viraj uyarı levhaları eklendi. Güzergâh başlangıç ekranından veya `?biome=forest|coastal|mountain|highland` ile seçilir. Yol/fizik ortak yüzeyi korunur. 15 Node testi ve dört biyom Chromium render/konsol kontrolü geçti; dört biyomun görüntüleri incelendi. Aşama 1'in 21 tarayıcı kontrolü yeni dünyada da geçti. Parça havuzu 50 km testinde sınırlı kalıyor.
+
+## Aşama 3 kaydı
+
+Sedan, hatchback, SUV, spor otomobil, kamyon, otobüs ve motosiklet için özgün birleşik geometriler; iki yönlü trafik, dört yoğunluk ve kapalı seçeneği; 56 nesnelik sabit havuz; eğriliğe göre hız, güvenli takip, boş karşı şeritte sollama ve dönüş eklendi. Süpürülmüş yönlü kutular ile oyuncu/araç ve yol kenarı çarpışmaları, görünür kaza ve kurtarma, gövde boyutları üzerinden yakın geçiş ve tek seferlik sollama olayları var. 21 Node testi (10 dakikalık hızlandırılmış trafik dahil), 5 trafik Chromium senaryosu geçti. Araç ve kaza görüntüleri incelendi. `?test=1&debug=1` sadece otomatik test düzenlemesi için ayrı sürücü açar; normal oyunda erişilmez. Sonraki: Aşama 4 modlar, skor ve yarış.

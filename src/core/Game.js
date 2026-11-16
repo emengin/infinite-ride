@@ -8,6 +8,9 @@ import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { FixedStep } from './FixedStep.js';
 import { seedFromString } from './math.js';
+import { TrafficManager } from '../traffic/TrafficManager.js';
+import { CollisionSystem } from '../physics/CollisionSystem.js';
+import { createTestDriver } from './TestDriver.js';
 
 export class Game {
   constructor(canvas) {
@@ -22,6 +25,14 @@ export class Game {
     this.path = new RoadPath(seed, query.get('biome') || 'auto');
     this.world = new WorldManager(this.renderer.scene, this.path);
     this.physics = new MotorcyclePhysics(this.path);
+    this.traffic = new TrafficManager(
+      this.renderer.scene,
+      this.path,
+      this.world,
+      query.get('traffic') || 'medium',
+    );
+    this.collisions = new CollisionSystem();
+    this.rideStats = { overtakes: 0, near: 0, crashes: 0 };
     this.motorcycle = new MotorcycleModel();
     this.renderer.scene.add(this.motorcycle.root);
     this.camera = new CameraController(this.renderer.camera, this.path, this.world);
@@ -34,8 +45,17 @@ export class Game {
       restart: () => this.start(),
       menu: () => this.mainMenu(),
       camera: () => this.action('camera'),
+      recover: () => this.recover(),
     });
     document.getElementById('biome-select').value = this.path.biomes.choice;
+    document.getElementById('traffic-select').value = this.traffic.simulation.density;
+    document
+      .getElementById('traffic-select')
+      .addEventListener(
+        'change',
+        (event) => this.traffic.simulation.setDensity(event.target.value, this.physics.state.s),
+        { signal: this.ui.abort.signal },
+      );
     document.getElementById('biome-select').addEventListener(
       'change',
       (event) => {
@@ -78,7 +98,10 @@ export class Game {
     if (import.meta.env.DEV || query.has('debug'))
       Object.defineProperty(window, '__ride', {
         configurable: true,
-        value: Object.freeze({ snapshot: () => this.snapshot() }),
+        value: Object.freeze({
+          snapshot: () => this.snapshot(),
+          ...(query.get('test') === '1' ? { test: createTestDriver(this) } : {}),
+        }),
       });
     this.frame = this.frame.bind(this);
     this.frameId = requestAnimationFrame(this.frame);
@@ -93,6 +116,8 @@ export class Game {
   }
   start() {
     this.physics.reset();
+    this.traffic.reset(this.physics.state.s);
+    this.rideStats = { overtakes: 0, near: 0, crashes: 0 };
     this.camera.rebase(this.world.update(this.physics.state.s));
     this.camera.initialized = false;
     this.setMode('running');
@@ -104,19 +129,49 @@ export class Game {
     this.setMode('intro');
   }
   action(action) {
-    if (action === 'pause' && this.mode !== 'intro')
+    if (action === 'pause' && ['running', 'paused'].includes(this.mode))
       this.setMode(this.mode === 'running' ? 'paused' : 'running');
     if (action === 'camera' && this.mode !== 'intro') {
       this.camera.cycle();
       this.ui.toast(CAMERA_LABELS_TURKISH[this.camera.mode]);
     }
-    if (action === 'recover' && this.mode === 'running') {
-      this.physics.reset(this.physics.state.s, true);
-      this.input.clear();
-      this.camera.initialized = false;
-      this.ui.toast('Motosiklet güvenle sağ şeride alındı.');
-    }
+    if (action === 'recover' && ['running', 'crashed'].includes(this.mode)) this.recover();
     if (action === 'debug') this.ui.toggleDebug();
+  }
+
+  recover() {
+    this.physics.reset(this.physics.state.s, true);
+    this.traffic.reset(this.physics.state.s);
+    this.camera.initialized = false;
+    this.setMode('running');
+    this.ui.toast('Motosiklet güvenle sağ şeride alındı.');
+  }
+  step(dt, input) {
+    const st = this.physics.state;
+    st.prevS = st.s;
+    st.prevD = st.d;
+    this.physics.update(dt, input);
+    const events = this.traffic.update(dt, st);
+    const hit = this.collisions.check(st, this.traffic.simulation.actors, this.world);
+    if (hit && st.speed > 1) {
+      this.rideStats.crashes++;
+      this.lastCrash = hit;
+      st.speed = 0;
+      this.setMode('crashed');
+      this.ui.toast(
+        hit.kind === 'vehicle'
+          ? 'Araçla çarpıştın. R ile yola dön.'
+          : 'Yol kenarına çarptın. R ile yola dön.',
+      );
+      return;
+    }
+    for (const event of events) {
+      if (event.type === 'near') {
+        this.rideStats.near++;
+        this.ui.toast(`Yakın geçiş · ${event.clearance.toFixed(2)} m`);
+      }
+      if (event.type === 'overtake') this.rideStats.overtakes++;
+    }
   }
 
   frame(time) {
@@ -125,7 +180,10 @@ export class Game {
     this.fps += (1 / Math.max(dt, 0.001) - this.fps) * 0.035;
     const input =
       this.mode === 'running' ? this.input.sample() : { throttle: 0, brake: 0, steer: 0 };
-    if (this.mode === 'running') this.fixed.advance(dt, (step) => this.physics.update(step, input));
+    if (this.mode === 'running')
+      this.fixed.advance(dt, (step) => {
+        if (this.mode === 'running') this.step(step, input);
+      });
     this.camera.rebase(this.world.update(this.physics.state.s));
     const pose = this.physics.pose();
     this.world.toLocal(pose, this.motorcycle.root.position);
@@ -137,7 +195,9 @@ export class Game {
       this.mode === 'running' ? dt : 0,
       this.camera.mode === 1 && this.mode !== 'intro',
     );
+    if (this.mode === 'crashed') this.motorcycle.leanRoot.rotation.z = 0.95;
     if (this.mode !== 'paused') this.camera.update(dt, this.physics, pose, this.mode === 'intro');
+    this.traffic.render();
     this.renderer.render(this.motorcycle.root.position);
     const biome = this.path.biomes.sample(this.physics.state.s);
     this.renderer.environment(biome);
@@ -158,11 +218,22 @@ export class Game {
       recycled: this.world.recycled,
       origin: this.world.origin.s,
       seed: this.path.seed,
+      traffic: this.traffic.simulation.actors.length,
+      trafficPool: this.traffic.simulation.pool.length,
     };
   }
   snapshot() {
     return {
       mode: this.mode,
+      rideStats: { ...this.rideStats },
+      traffic: this.traffic.simulation.actors.map((a) => ({
+        id: a.id,
+        type: a.type,
+        s: a.s,
+        d: a.d,
+        dir: a.dir,
+        speed: a.speed,
+      })),
       physics: { ...this.physics.state },
       pose: this.physics.pose(),
       stats: this.stats(),
@@ -180,6 +251,7 @@ export class Game {
     this.input.dispose();
     this.ui.dispose();
     this.world.dispose();
+    this.traffic.dispose();
     this.motorcycle.dispose();
     this.renderer.dispose();
     delete window.__ride;

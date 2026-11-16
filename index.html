@@ -42,6 +42,16 @@
               <option value="highland">Highland Road</option>
             </select></label
           >
+          <label class="biome-choice"
+            >TRAFİK
+            <select id="traffic-select" aria-label="Trafik yoğunluğu">
+              <option value="off">Kapalı</option>
+              <option value="low">Low · sakin</option>
+              <option value="medium" selected>Medium · canlı</option>
+              <option value="high">High · yoğun</option>
+              <option value="extreme">Extreme · çok yoğun</option>
+            </select></label
+          >
           <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
           <div class="intro-meta">
             <span>01 — SERBEST SÜRÜŞ</span><span>TRAFİKSİZ · GÜNDÜZ</span>
@@ -93,6 +103,15 @@
         </div>
       </section>
       <div class="toast" id="toast" role="status" hidden></div>
+      <section class="overlay panel-overlay crash-overlay" id="crash" hidden>
+        <div class="panel">
+          <p class="eyebrow">BİR SONRAKİ VİRAJDA DAHA SAKİN</p>
+          <h2>Kaza!</h2>
+          <p>Yolculuk burada bitmek zorunda değil.</p>
+          <button class="primary" id="crash-recover">YOLA DÖN <span>↗</span></button>
+          <p>R · güvenli dönüş</p>
+        </div>
+      </section>
       <pre id="debug" hidden></pre>
       <div id="touch-controls" hidden aria-label="Dokunmatik sürüş kontrolleri">
         <div class="touch-steer">

@@ -35,7 +35,7 @@ const check = (label, condition) => {
   console.log(`PASS ${label}`);
 };
 try {
-  await page.goto(`${base}?debug=1`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}?debug=1&test=1&traffic=off`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__ride?.snapshot().stats.drawCalls > 0);
   const gpu = await page.evaluate(() => {
     const gl = document.querySelector('#game').getContext('webgl2'),
@@ -84,11 +84,18 @@ try {
     path: new URL('02-riding.png', artifacts).pathname.replace(/^\/(\w:)/, '$1'),
   });
   await page.keyboard.down('d');
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(350);
   await page.keyboard.up('d');
   const steering = await snapshot();
-  check('Steering changes heading and lateral position', steering.physics.d > fast.physics.d + 0.6);
-  await page.waitForTimeout(400);
+  check(
+    'Steering changes heading and lateral position',
+    steering.physics.d > fast.physics.d + 0.2 && steering.physics.headingError > 0.015,
+  );
+  await page.evaluate(
+    (distance) => window.__ride.test.player({ s: 24, d: -6.1, speed: 20, distance }),
+    fast.physics.distance,
+  );
+  await page.waitForTimeout(100);
   const dirt = await snapshot();
   check('Leaving the asphalt changes grip state', dirt.physics.offroad);
   const beforeBrake = dirt.physics.speed;

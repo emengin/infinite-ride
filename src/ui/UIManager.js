@@ -32,6 +32,7 @@ export class UIManager {
     bind('reset-button', 'restart');
     bind('menu-button', 'menu');
     bind('touch-camera', 'camera');
+    bind('crash-recover', 'recover');
     document
       .getElementById('reload-button')
       .addEventListener('click', () => window.location.reload(), { signal: this.abort.signal });
@@ -45,6 +46,7 @@ export class UIManager {
     for (const key of ['intro', 'pause'])
       this.elements[key].hidden = mode !== (key === 'intro' ? 'intro' : 'paused');
     this.elements.hud.hidden = mode === 'intro';
+    document.getElementById('crash').hidden = mode !== 'crashed';
     this.elements['touch-controls'].hidden = mode !== 'running' || !this.touch;
     const button = document.getElementById('pause-button');
     button.hidden = mode === 'intro';

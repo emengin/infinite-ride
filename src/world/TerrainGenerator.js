@@ -13,7 +13,7 @@ export class TerrainGenerator {
       crowns: [
         new THREE.IcosahedronGeometry(1, 1),
         new THREE.MeshStandardMaterial({ color: 0x4b674d, roughness: 1, flatShading: true }),
-        144,
+        192,
       ],
       needles: [
         new THREE.ConeGeometry(1, 1, 7),
@@ -72,6 +72,7 @@ export class TerrainGenerator {
     return group;
   }
   rebuild(group, start, anchor) {
+    group.userData.obstacles = [];
     const rows = ROAD.chunkLength / ROAD.step + 1,
       cols = LATERAL.length,
       positions = [],
@@ -128,6 +129,8 @@ export class TerrainGenerator {
       const p = this.path.surface(s, d),
         height = 5 + hash(id + 2, this.path.seed) * 9,
         angle = hash(id + 3, this.path.seed) * 6.28;
+      if (Math.abs(d) < 27)
+        group.userData.obstacles.push({ s, d, halfLength: 0.2, halfWidth: 0.2, headingError: 0 });
       place('trunks', { ...p, y: p.y + height * 0.34 }, [1.1, height * 0.68, 1.1], angle);
       if (hash(id + 7, this.path.seed) < 0.7 + b.mountain * 0.25)
         for (let layer = 0; layer < 3; layer++) {
@@ -158,12 +161,21 @@ export class TerrainGenerator {
             ? 150 + hash(id + 1, this.path.seed) * 260
             : 7.9 + hash(id + 1, this.path.seed) * 90);
       if (d > 0 && b.coast > 0.6) continue;
-      const p = this.path.surface(s, d),
-        scale =
-          (distant
-            ? 12 + hash(id + 2, this.path.seed) * 33
-            : 0.4 + hash(id + 2, this.path.seed) * 3.4) *
-          (0.5 + b.rock);
+      const scale =
+        (distant
+          ? 12 + hash(id + 2, this.path.seed) * 33
+          : 0.4 + hash(id + 2, this.path.seed) * 3.4) *
+        (0.5 + b.rock);
+      const safeD = Math.sign(d) * Math.max(Math.abs(d), ROAD.shoulder + scale * 1.35 + 1);
+      const p = this.path.surface(s, safeD);
+      if (Math.abs(safeD) < 30)
+        group.userData.obstacles.push({
+          s,
+          d: safeD,
+          halfLength: scale * 0.8,
+          halfWidth: scale * 1.1,
+          headingError: 0,
+        });
       place(
         'rocks',
         { ...p, y: p.y + scale * 0.24 },
