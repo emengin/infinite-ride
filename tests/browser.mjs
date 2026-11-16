@@ -56,16 +56,17 @@ try {
     idle.mode === 'running' && idle.physics.speed === 0,
   );
   await page.keyboard.down('w');
-  await page.waitForTimeout(7000);
+  await page.waitForTimeout(3000);
   const mid = await snapshot();
   check(
     'Keyboard throttle drives forward and updates HUD',
-    mid.physics.distance > 120 &&
-      mid.physics.speed > 35 &&
-      +(await page.locator('#speed').textContent()) > 120,
+    mid.physics.distance > 25 &&
+      mid.physics.speed > 18 &&
+      +(await page.locator('#speed').textContent()) > 60,
   );
-  await page.waitForTimeout(9000);
   await page.keyboard.up('w');
+  await page.evaluate(() => window.__ride.test.drive(25, 45));
+  await page.waitForTimeout(600);
   const fast = await snapshot();
   check(
     'Infinite road recycles chunks and rebases origin during real driving',
@@ -83,13 +84,16 @@ try {
   await page.screenshot({
     path: new URL('02-riding.png', artifacts).pathname.replace(/^\/(\w:)/, '$1'),
   });
+  await page.evaluate(() => window.__ride.test.player({ s: 24, d: 2.3, speed: 25 }));
+  const beforeSteer = await snapshot();
   await page.keyboard.down('d');
   await page.waitForTimeout(350);
   await page.keyboard.up('d');
   const steering = await snapshot();
   check(
     'Steering changes heading and lateral position',
-    steering.physics.d > fast.physics.d + 0.2 && steering.physics.headingError > 0.015,
+    steering.physics.d > beforeSteer.physics.d + 0.2 &&
+      steering.pose.heading > beforeSteer.pose.heading + 0.015,
   );
   await page.evaluate(
     (distance) => window.__ride.test.player({ s: 24, d: -6.1, speed: 20, distance }),

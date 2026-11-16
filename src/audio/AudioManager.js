@@ -1,4 +1,5 @@
 import { clamp } from '../core/math.js';
+import { engineReadout } from '../motorcycle/engine.js';
 
 export class AudioManager {
   constructor() {
@@ -84,11 +85,8 @@ export class AudioManager {
   update(state, input, running, actors = []) {
     if (!this.context || !this.enabled) return;
     const c = this.context,
-      t = c.currentTime,
-      kmh = state.speed * 3.6,
-      gear = Math.min(5, Math.floor(kmh / 38));
-    const rpm =
-      1200 + clamp((kmh - gear * 38) / 38, 0, 1) * 6800 + gear * 450 + input.throttle * 1100;
+      t = c.currentTime;
+    const { rpm } = engineReadout(state.speed, input.throttle);
     this.params = { rpm, wind: clamp(state.speed / 65, 0, 1) };
     const set = (param, value, rate = 0.08) => param.setTargetAtTime(value, t, rate);
     set(this.master.gain, this.volume, 0.12);

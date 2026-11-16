@@ -51,7 +51,10 @@ try {
     growth = Math.max(...warm.map((s) => s.heap)) - Math.min(...warm.map((s) => s.heap));
   assert.ok(growth < 8 * 1048576, `JS heap growth ${(growth / 1048576).toFixed(2)} MiB`);
   // A separate wall-clock interval measures actual render pacing, not accelerated simulation throughput.
-  await page.evaluate(() => window.__ride.test.resetPerformance());
+  await page.evaluate(() => {
+    window.__ride.test.realtimeDrive(32);
+    window.__ride.test.resetPerformance();
+  });
   await page.waitForTimeout(1000);
   const pacing = await page.evaluate(
     () =>
@@ -77,6 +80,8 @@ try {
       }),
   );
   const final = await page.evaluate(() => window.__ride.snapshot());
+  assert.equal(final.mode, 'running', 'real-time pacing interval keeps driving');
+  await page.evaluate(() => window.__ride.test.realtimeDrive(null));
   assert.ok(final.physics.distance > 15000);
   assert.equal(errors.length, 0, JSON.stringify(errors));
   await writeFile(

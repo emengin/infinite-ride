@@ -39,6 +39,7 @@ try {
         'traffic-browser.mjs',
         'modes-browser.mjs',
         'polish-browser.mjs',
+        'interface-browser.mjs',
         'audit-browser.mjs',
         'pages.mjs',
       ];

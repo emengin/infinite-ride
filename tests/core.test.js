@@ -10,6 +10,11 @@ import { CameraController } from '../src/rendering/CameraController.js';
 
 const close = (a, b, tolerance = 1e-7) => assert.ok(Math.abs(a - b) < tolerance, `${a} ≠ ${b}`);
 const path = new RoadPath(7049);
+class StraightRoad extends RoadPath {
+  center(s) {
+    return { x: 0, y: 0, z: -s };
+  }
+}
 
 test('same seed produces identical road; different seeds change it', () => {
   const a = new RoadPath(7049),
@@ -95,7 +100,7 @@ test('adjacent road meshes join without cracks, including far coordinates', () =
 });
 
 test('throttle accelerates progressively; coasting and brakes decelerate', () => {
-  const b = new MotorcyclePhysics(path);
+  const b = new MotorcyclePhysics(new StraightRoad(7049));
   b.update(1 / 120, { throttle: 1 });
   assert.ok(b.state.speed > 0 && b.state.speed < 0.1);
   for (let i = 0; i < 120 * 8; i++) b.update(1 / 120, { throttle: 1 });
@@ -124,8 +129,8 @@ test('steering changes heading before lateral position; no sideways sliding at s
   assert.ok(b.state.lean < 0);
 });
 
-test('at 80 km/h, road assist follows curves and visible elevation for 10 km', () => {
-  const b = new MotorcyclePhysics(path);
+test('AI-only road assist follows curves and visible elevation for 10 km at 80 km/h', () => {
+  const b = new MotorcyclePhysics(path, { roadAssist: true });
   for (let i = 0; i < 120 * 470; i++) {
     // Speed regulation in the test driver; actual player uses throttle/brake.
     const throttle = Math.max(0, Math.min(1, 0.35 + (22.22 - b.state.speed) * 0.3));
@@ -134,6 +139,50 @@ test('at 80 km/h, road assist follows curves and visible elevation for 10 km', (
     if (i % 120 === 0) close(b.pose().y, path.surface(b.state.s, b.state.d).y);
   }
   assert.ok(b.state.distance > 10000);
+});
+
+test('player never steers or leans automatically as road curvature changes', () => {
+  for (const s of [24, 260, 600, 1100, 2500]) {
+    const bike = new MotorcyclePhysics(path);
+    bike.reset(s);
+    bike.state.speed = 22;
+    const heading = bike.pose().heading;
+    for (let i = 0; i < 120; i++) bike.update(1 / 120, { throttle: 0.5 });
+    close(bike.pose().heading, heading);
+    close(bike.state.lean, 0);
+    close(bike.state.yawRate, 0);
+    close(bike.state.steer, 0);
+  }
+});
+
+test('releasing steering settles without countersteering, oscillation or road correction', () => {
+  const bike = new MotorcyclePhysics(new StraightRoad(7049));
+  bike.state.speed = 18;
+  for (let i = 0; i < 24; i++) bike.update(1 / 120, { steer: 1 });
+  let previous = bike.state.heading;
+  for (let i = 0; i < 240; i++) {
+    bike.update(1 / 120, {});
+    assert.ok(bike.state.yawRate >= 0);
+    assert.ok(bike.state.heading >= previous);
+    previous = bike.state.heading;
+  }
+  assert.ok(bike.state.yawRate < 1e-7);
+  const settled = bike.state.heading;
+  for (let i = 0; i < 120; i++) bike.update(1 / 120, {});
+  close(bike.state.heading, settled);
+  assert.ok(Math.abs(bike.state.lean) < 1e-7);
+});
+
+test('outer world boundary stops the player without turning them toward the road', () => {
+  const bike = new MotorcyclePhysics(path);
+  bike.state.d = 25.99;
+  bike.state.heading += 0.5;
+  bike.state.speed = 30;
+  const heading = bike.state.heading;
+  for (let i = 0; i < 10; i++) bike.update(1 / 120, {});
+  close(bike.state.d, 26);
+  close(bike.state.speed, 0);
+  close(bike.state.heading, heading);
 });
 
 test('off-road has less acceleration and recover resets safely without losing distance', () => {

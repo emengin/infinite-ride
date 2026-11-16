@@ -1,5 +1,6 @@
 import { CAMERA_LABELS } from '../rendering/CameraController.js';
 import { MODES } from '../modes/SessionManager.js';
+import { engineReadout } from '../motorcycle/engine.js';
 
 export class UIManager {
   constructor(actions) {
@@ -42,6 +43,8 @@ export class UIManager {
     bind('settings-close', 'closeSettings');
     bind('how-to-play', 'help');
     bind('help-close', 'closeHelp');
+    bind('fullscreen-button', 'fullscreen');
+    document.getElementById('fullscreen-button').hidden = !document.fullscreenEnabled;
     document.getElementById('settings-form').addEventListener(
       'submit',
       (event) => {
@@ -65,12 +68,73 @@ export class UIManager {
       .getElementById('reload-button')
       .addEventListener('click', () => window.location.reload(), { signal: this.abort.signal });
     this.touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    document.body.classList.toggle('touch-device', this.touch);
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.code === 'Tab') {
+          const dialog = ['settings', 'help', 'results', 'crash', 'pause']
+            .map((id) => document.getElementById(id))
+            .find((element) => !element.hidden);
+          if (dialog) {
+            const controls = [
+              ...dialog.querySelectorAll(
+                'button:not(:disabled), select:not(:disabled), input:not(:disabled)',
+              ),
+            ].filter((element) => element.getClientRects().length);
+            const first = controls[0],
+              last = controls.at(-1);
+            if (
+              !dialog.contains(document.activeElement) ||
+              (!event.shiftKey && document.activeElement === last) ||
+              (event.shiftKey && document.activeElement === first)
+            ) {
+              event.preventDefault();
+              (event.shiftKey ? last : first)?.focus();
+            }
+          }
+        }
+        if (
+          document.body.dataset.mode !== 'intro' ||
+          !document.getElementById('settings').hidden ||
+          !document.getElementById('help').hidden ||
+          /INPUT|SELECT|TEXTAREA/.test(event.target.tagName)
+        )
+          return;
+        if (['ArrowUp', 'ArrowDown'].includes(event.code) && !event.repeat) {
+          event.preventDefault();
+          const modes = ['free', 'rush', 'race'];
+          actions.selectMode(
+            modes[(modes.indexOf(this.selectedMode) + (event.code === 'ArrowDown' ? 1 : 2)) % 3],
+          );
+        }
+        if (
+          event.code === 'Enter' &&
+          !event.repeat &&
+          (event.target.id === 'start-button' ||
+            event.target === document.body ||
+            event.target.dataset.modeChoice)
+        ) {
+          event.preventDefault();
+          actions.start();
+        }
+      },
+      { signal: this.abort.signal },
+    );
     this.lastUpdate = -1;
     this.toastTimer = null;
   }
 
   mode(mode) {
     document.body.dataset.mode = mode;
+    document.getElementById('header-section').textContent = {
+      intro: 'ANA MENÜ',
+      running: 'SÜRÜŞ',
+      countdown: 'START GRID',
+      paused: 'DURAKLATILDI',
+      crashed: 'ÇARPIŞMA',
+      results: 'SONUÇLAR',
+    }[mode];
     for (const key of ['intro', 'pause'])
       this.elements[key].hidden = mode !== (key === 'intro' ? 'intro' : 'paused');
     this.elements.hud.hidden = mode === 'intro';
@@ -78,20 +142,52 @@ export class UIManager {
     document.getElementById('results').hidden = mode !== 'results';
     this.elements['touch-controls'].hidden = mode !== 'running' || !this.touch;
     const button = document.getElementById('pause-button');
-    button.hidden = mode === 'intro';
+    button.hidden = !['running', 'countdown', 'paused'].includes(mode);
     button.setAttribute('aria-label', mode === 'paused' ? 'Sürüşe dön' : 'Duraklat');
-    const focusId = { intro: 'start-button', paused: 'resume-button' }[mode];
+    const focusId = {
+      intro: 'start-button',
+      paused: 'resume-button',
+      results: 'result-retry',
+      crashed: 'crash-recover',
+    }[mode];
     if (focusId) document.getElementById(focusId).focus({ preventScroll: true });
     else document.activeElement?.blur();
   }
 
   selectMode(mode) {
+    this.selectedMode = mode;
     document.querySelectorAll('[data-mode-choice]').forEach((button) => {
       button.classList.toggle('selected', button.dataset.modeChoice === mode);
       button.setAttribute('aria-pressed', String(button.dataset.modeChoice === mode));
     });
     document.getElementById('mode-description').textContent = MODES[mode].description;
     document.getElementById('mode-label').textContent = MODES[mode].label;
+    document.getElementById('mode-index').textContent =
+      `0${['free', 'rush', 'race'].indexOf(mode) + 1} / 03`;
+    document.getElementById('menu-mode-name').textContent = MODES[mode].label;
+    this.records(this.savedRecords);
+  }
+  records(records = {}) {
+    this.savedRecords = records && typeof records === 'object' ? records : {};
+    const record = this.savedRecords[this.selectedMode];
+    document.getElementById('menu-best').textContent =
+      this.selectedMode === 'free'
+        ? 'SINIRSIZ MESAFE · KENDİ TEMPON'
+        : record && Number.isFinite(record.score) && this.selectedMode === 'rush'
+          ? `KİŞİSEL REKOR · ${record.score.toLocaleString('tr-TR')} PUAN`
+          : record && Number.isFinite(record.time) && this.selectedMode === 'race'
+            ? `EN İYİ · ${record.position}. SIRA / ${formatTime(record.time)}`
+            : 'İLK REKORUNU OLUŞTUR';
+  }
+  route(biome) {
+    document.getElementById('menu-route-name').textContent =
+      {
+        auto: 'KEŞİF ROTASI',
+        forest: 'ORMAN YOLU',
+        coastal: 'SAHİL YOLU',
+        mountain: 'DAĞ GEÇİDİ',
+        highland: 'YAYLA YOLU',
+      }[biome] || 'KEŞİF ROTASI';
   }
   session(session, race, mode) {
     const score = document.getElementById('score-panel');
@@ -117,11 +213,11 @@ export class UIManager {
     document.getElementById('result-title').textContent =
       result.mode === 'race'
         ? result.position === 1
-          ? 'Zirve senin.'
-          : 'Yarış tamamlandı.'
+          ? 'ZAFER SENİN.'
+          : 'YARIŞ TAMAMLANDI.'
         : result.mode === 'rush'
-          ? 'Riskin karşılığı.'
-          : 'İyi yolculuktu.';
+          ? 'SÜRÜŞ TAMAMLANDI.'
+          : 'YOLCULUK TAMAMLANDI.';
     document.getElementById('result-mode').textContent = MODES[result.mode].label;
     const stats = [
       ['MESAFE', `${(result.distance / 1000).toFixed(2)} km`],
@@ -157,10 +253,14 @@ export class UIManager {
     this.lastUpdate = now;
     const e = this.elements,
       kmh = Math.round(state.speed * 3.6);
-    e.speed.textContent = String(kmh).padStart(3, '0');
+    e.speed.textContent = String(kmh);
+    document.getElementById('pause-distance').textContent =
+      `${(state.distance / 1000).toFixed(2)} KM`;
+    document.getElementById('pause-max').textContent = `${Math.round(state.maxSpeed * 3.6)} KM/H`;
     e.distance.textContent = (state.distance / 1000).toFixed(2);
-    e.gear.textContent = kmh < 2 ? 'N' : String(Math.min(6, Math.floor(kmh / 38) + 1));
-    e['speed-bar'].style.width = `${Math.min(100, (kmh / 226.8) * 100)}%`;
+    const engine = engineReadout(state.speed, input.throttle);
+    e.gear.textContent = engine.gear;
+    e['speed-bar'].style.width = `${Math.min(100, (engine.rpm / 12000) * 100)}%`;
     e['drive-label'].textContent = input.brake
       ? 'FREN'
       : state.offroad
@@ -180,12 +280,16 @@ export class UIManager {
       String(Math.max(0, Math.min(0.28, (state.speed - 38) / 110))),
     );
     if (!e.debug.hidden)
-      e.debug.textContent = `INFINITE RIDE / 1.0.0\n${stats.fps.toFixed(0)} FPS · ${stats.drawCalls} draw calls\n${stats.triangles.toLocaleString()} triangles\n${stats.chunks} chunks · ${stats.geometries} geometries\n${stats.traffic} traffic / ${stats.trafficPool} pooled\n${stats.recycled} chunk fills · DPR ${stats.pixelRatio.toFixed(2)}\ns ${state.s.toFixed(1)} m · d ${state.d.toFixed(2)} m\norigin ${stats.origin} m · seed ${stats.seed}\nheading ${state.headingError.toFixed(3)} · lean ${state.lean.toFixed(3)}`;
+      e.debug.textContent = `INFINITE RIDE / 1.1.0\n${stats.fps.toFixed(0)} FPS · ${stats.drawCalls} draw calls\n${stats.triangles.toLocaleString()} triangles\n${stats.chunks} chunks · ${stats.geometries} geometries\n${stats.traffic} traffic / ${stats.trafficPool} pooled\n${stats.recycled} chunk fills · DPR ${stats.pixelRatio.toFixed(2)}\ns ${state.s.toFixed(1)} m · d ${state.d.toFixed(2)} m\norigin ${stats.origin} m · seed ${stats.seed}\nheading ${state.headingError.toFixed(3)} · lean ${state.lean.toFixed(3)}`;
   }
 
   settings(values, visible, locked = false) {
+    if (visible) this.settingsFocus = document.activeElement;
     document.getElementById('settings').hidden = !visible;
-    if (!visible) return;
+    if (!visible) {
+      this.settingsFocus?.focus({ preventScroll: true });
+      return;
+    }
     const form = document.getElementById('settings-form');
     for (const element of form.elements)
       if (element.name) {
@@ -207,8 +311,10 @@ export class UIManager {
     }
   }
   help(visible) {
+    if (visible) this.helpFocus = document.activeElement;
     document.getElementById('help').hidden = !visible;
     if (visible) document.getElementById('help-close').focus();
+    else this.helpFocus?.focus({ preventScroll: true });
   }
 
   toast(message) {

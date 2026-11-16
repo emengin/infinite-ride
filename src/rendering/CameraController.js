@@ -46,11 +46,12 @@ export class CameraController {
     const helmet = this.mode === 1 && !menu;
     if (menu) {
       this.target.set(
-        p.x + right.x * 4.5 - forward.x * 4.8,
-        p.y + 2.7,
-        p.z + right.z * 4.5 - forward.z * 4.8,
+        p.x + right.x * 3.5 - forward.x * 4.3,
+        p.y + 1.85,
+        p.z + right.z * 3.5 - forward.z * 4.3,
       );
-      this.look.set(p.x, p.y + 1, p.z);
+      const offset = this.camera.aspect > 1.15 ? 1.7 : 0;
+      this.look.set(p.x - right.x * offset, p.y + 1.05, p.z - right.z * offset);
     } else if (helmet) {
       // At visor height above the tank, with the head hidden, never inside the fairing.
       this.target.set(p.x - forward.x * 0.08, p.y + 1.9, p.z - forward.z * 0.08);
@@ -74,10 +75,20 @@ export class CameraController {
           Math.max(-0.1, Math.min(0.1, st.acceleration * 0.009)),
         p.z - forward.z * distance + right.z * side,
       );
-      const ahead = this.path.surface(st.s + 8 + st.speed * 0.1, st.d);
-      this.look.set(ahead.x - o.x, ahead.y - o.y + 0.9, ahead.z - o.z);
+      const lookDistance = 6 + st.speed * 0.065;
+      this.look.set(
+        p.x + forward.x * lookDistance,
+        p.y + 0.95 + Math.sin(pose.pitch) * lookDistance,
+        p.z + forward.z * lookDistance,
+      );
       // The camera samples the terrain underneath its own route position.
-      const floor = this.path.surface(st.s - distance, st.d + side).y - o.y + 0.8;
+      const floor =
+        this.path.surface(
+          st.s - Math.cos(st.headingError) * distance,
+          st.d - Math.sin(st.headingError) * distance + side,
+        ).y -
+        o.y +
+        0.8;
       this.target.y = Math.max(this.target.y, floor);
     }
     if (st.offroad && !menu && st.speed > 1) {

@@ -19,7 +19,7 @@ export class RaceManager {
       { name: 'ATLAS', pace: 53, lane: 2.6 },
       { name: 'ECHO', pace: 58, lane: 3.8 },
     ].map((personality, i) => {
-      const physics = new MotorcyclePhysics(this.path);
+      const physics = new MotorcyclePhysics(this.path, { roadAssist: true });
       physics.reset(start + 5 + i * 4);
       physics.state.d = personality.lane;
       return {

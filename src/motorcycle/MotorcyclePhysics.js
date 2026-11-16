@@ -2,8 +2,9 @@ import { clamp, damp } from '../core/math.js';
 import { ROAD } from '../world/RoadPath.js';
 
 export class MotorcyclePhysics {
-  constructor(path) {
+  constructor(path, { roadAssist = false } = {}) {
     this.path = path;
+    this.roadAssist = roadAssist;
     this.sensitivity = 1;
     this.reset();
   }
@@ -15,6 +16,7 @@ export class MotorcyclePhysics {
       d: 2.3,
       speed: 0,
       headingError: 0,
+      heading: this.path.frame(s).heading,
       steer: 0,
       lean: 0,
       acceleration: 0,
@@ -60,14 +62,25 @@ export class MotorcyclePhysics {
     if (st.speed === 0) st.acceleration = 0;
     st.steer = damp(st.steer, clamp(input.steer || 0, -1, 1), 11, dt);
 
-    // Assisted bicycle steering. The base yaw follows the road; player input
-    // changes heading before it changes lateral position. Grip limits road yaw.
-    const targetHeading = st.steer * (0.32 / (1 + st.speed / 27)) * this.sensitivity;
-    const roadYaw = frame.curvature * st.speed * Math.cos(st.headingError);
-    const wantedYaw = roadYaw + (targetHeading - st.headingError) * 3.8;
     const maxYaw = (10.8 * grip) / Math.max(st.speed, 5);
-    st.yawRate = clamp(wantedYaw, -maxYaw, maxYaw);
-    st.headingError = clamp(st.headingError + (st.yawRate - roadYaw) * dt, -0.72, 0.72);
+    if (this.roadAssist) {
+      // Opt-in assistance is reserved for AI riders. The player never receives
+      // curvature feed-forward or an automatic steering correction.
+      const targetHeading = st.steer * (0.32 / (1 + st.speed / 27)) * this.sensitivity;
+      const roadYaw = frame.curvature * st.speed * Math.cos(st.headingError);
+      st.yawRate = clamp(roadYaw + (targetHeading - st.headingError) * 3.8, -maxYaw, maxYaw);
+      st.headingError = clamp(st.headingError + (st.yawRate - roadYaw) * dt, -0.72, 0.72);
+    } else {
+      const steeringRate = this.steeringRate(st.speed);
+      const targetYaw = st.steer * steeringRate;
+      st.yawRate = clamp(damp(st.yawRate, targetYaw, 14, dt), -maxYaw, maxYaw);
+      if (st.speed < 0.01) st.yawRate = 0;
+      st.heading += st.yawRate * dt;
+      st.headingError = Math.atan2(
+        Math.sin(st.heading - frame.heading),
+        Math.cos(st.heading - frame.heading),
+      );
+    }
     const advance =
       (st.speed * Math.cos(st.headingError)) /
       Math.max(0.65, frame.metric * (1 - frame.curvature * st.d));
@@ -76,14 +89,25 @@ export class MotorcyclePhysics {
     // A generous recoverable corridor, far outside the asphalt.
     if (Math.abs(st.d) > 26) {
       st.d = clamp(st.d, -26, 26);
-      st.headingError = -Math.sign(st.d) * 0.16;
-      st.speed = Math.min(st.speed, 7);
+      st.speed = 0;
+      st.yawRate = 0;
     }
+    const updatedFrame = this.path.frame(st.s);
+    if (this.roadAssist) st.heading = updatedFrame.heading + st.headingError;
+    else
+      st.headingError = Math.atan2(
+        Math.sin(st.heading - updatedFrame.heading),
+        Math.cos(st.heading - updatedFrame.heading),
+      );
     const targetLean =
       -clamp(Math.atan((st.speed * st.yawRate) / 9.81), -0.67, 0.67) * clamp(st.speed / 6, 0, 1);
     st.lean = damp(st.lean, targetLean, 7.5, dt);
     st.distance += st.speed * dt;
     st.maxSpeed = Math.max(st.maxSpeed, st.speed);
+  }
+
+  steeringRate(speed) {
+    return (0.78 / (1 + speed / 27)) * (speed / (speed + 4)) * this.sensitivity;
   }
 
   pose() {
@@ -94,7 +118,7 @@ export class MotorcyclePhysics {
     const back = this.path.surface(st.s - 0.84, st.d);
     return {
       ...p,
-      heading: f.heading + st.headingError,
+      heading: this.roadAssist ? f.heading + st.headingError : st.heading,
       pitch: Math.atan2(front.y - back.y, Math.hypot(front.x - back.x, front.z - back.z)),
     };
   }

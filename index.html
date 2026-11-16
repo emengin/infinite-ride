@@ -3,76 +3,167 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#171c1c" />
+    <meta name="theme-color" content="#0c1016" />
     <meta
       name="description"
-      content="INFINITE RIDE. The Road Never Ends. Sonsuz yolda motosiklet sürüşü."
+      content="INFINITE RIDE. Sonsuz yollar, canlı trafik, motosiklet yarışları."
     />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
     <title>INFINITE RIDE — The Road Never Ends.</title>
   </head>
   <body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7" /></symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 4 8 8-8 8" /></symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" /></symbol>
+        <symbol id="i-camera" viewBox="0 0 24 24">
+          <path d="M3 7h4l2-3h6l2 3h4v13H3Z" />
+          <circle cx="12" cy="13" r="4" />
+        </symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24">
+          <path d="M5 3v18M12 3v18M19 3v18M2 8h6M9 16h6M16 7h6" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6" /></symbol>
+        <symbol id="i-expand" viewBox="0 0 24 24">
+          <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+        </symbol>
+        <symbol id="i-flag" viewBox="0 0 24 24">
+          <path d="M5 21V3M5 4h14v10H5M10 4v10M14 4v10M5 9h14" />
+        </symbol>
+        <symbol id="i-road" viewBox="0 0 24 24">
+          <path d="m7 3-4 18M17 3l4 18M12 3v4M12 10v4M12 17v4" />
+        </symbol>
+        <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m14 2-9 12h6l-1 8 9-13h-6Z" /></symbol>
+        <symbol id="i-help" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17v.1" />
+        </symbol>
+      </defs>
+    </svg>
     <canvas id="game" aria-label="INFINITE RIDE üç boyutlu sürüş alanı"></canvas>
     <div class="vignette" aria-hidden="true"></div>
     <div class="speed-effect" aria-hidden="true"></div>
+
     <header class="topbar">
-      <a class="wordmark" href="./" aria-label="INFINITE RIDE başlangıç"
-        ><span class="brand-symbol">//</span> INFINITE<span>RIDE</span></a
+      <a class="wordmark" href="./" aria-label="INFINITE RIDE ana menü"
+        ><span class="brand-symbol">IR<span>///</span></span
+        ><span class="wordmark-label">INFINITE RIDE</span></a
       >
-      <div class="stage-tag"><i></i> INFINITE RIDE <span> / THE ROAD NEVER ENDS.</span></div>
-      <button class="icon-button" id="pause-button" aria-label="Duraklat" title="Duraklat · Esc">
-        Ⅱ
-      </button>
+      <span class="header-section" id="header-section">ANA MENÜ</span>
+      <div class="header-actions">
+        <span class="player-tag"><i></i> TEK OYUNCULU</span
+        ><button
+          class="icon-button"
+          id="fullscreen-button"
+          aria-label="Tam ekran"
+          title="Tam ekran"
+        >
+          <svg><use href="#i-expand" /></svg></button
+        ><button
+          class="icon-button pause-button"
+          id="pause-button"
+          aria-label="Duraklat"
+          title="Duraklat · Esc"
+          hidden
+        >
+          <svg><use href="#i-pause" /></svg><kbd>ESC</kbd>
+        </button>
+      </div>
     </header>
+
     <main id="interface">
       <section class="intro overlay" id="intro" aria-labelledby="intro-title">
-        <div class="intro-content">
-          <p class="eyebrow"><span></span> BİR YOL. SONSUZ OLASILIK.</p>
-          <h1 id="intro-title">INFINITE<br /><em>RIDE.</em></h1>
-          <p class="tagline">The Road Never Ends.</p>
-          <div class="mode-choices" aria-label="Oyun modu">
-            <button data-mode-choice="free" class="selected">FREE RIDE</button
-            ><button data-mode-choice="rush">TRAFFIC RUSH</button
-            ><button data-mode-choice="race">RACE</button>
+        <div class="menu-shade" aria-hidden="true"></div>
+        <div class="menu-grid" aria-hidden="true"></div>
+        <div class="menu-rail">
+          <div class="game-title">
+            <span class="edition-tag">MOTORCYCLE EXPERIENCE</span>
+            <h1 id="intro-title">
+              INFINITE<br /><em>RIDE</em><span class="title-slashes">///</span>
+            </h1>
+            <p>THE ROAD NEVER ENDS.</p>
           </div>
-          <p class="intro-copy">
-            Kontak sende. Önünde kıvrılan bir yol,<br />uzakta tepeler. Sadece sür.
-          </p>
-          <label class="biome-choice"
-            >GÜZERGÂH
-            <select id="biome-select" aria-label="Biyom">
-              <option value="auto">Keşif · tüm biyomlar</option>
+          <div class="mode-heading"><span>OYUN MODU</span><span id="mode-index">01 / 03</span></div>
+          <nav class="mode-choices" aria-label="Oyun modu">
+            <button data-mode-choice="free" class="mode-card selected" aria-pressed="true">
+              <span class="mode-icon"
+                ><svg><use href="#i-road" /></svg></span
+              ><span class="mode-copy"><strong>SERBEST SÜRÜŞ</strong><small>FREE RIDE</small></span
+              ><svg class="mode-arrow"><use href="#i-chevron" /></svg>
+            </button>
+            <button data-mode-choice="rush" class="mode-card" aria-pressed="false">
+              <span class="mode-icon"
+                ><svg><use href="#i-bolt" /></svg></span
+              ><span class="mode-copy"
+                ><strong>TRAFİKTE HIZ</strong><small>TRAFFIC RUSH</small></span
+              ><svg class="mode-arrow"><use href="#i-chevron" /></svg>
+            </button>
+            <button data-mode-choice="race" class="mode-card" aria-pressed="false">
+              <span class="mode-icon"
+                ><svg><use href="#i-flag" /></svg></span
+              ><span class="mode-copy"><strong>YARIŞ</strong><small>3 RAKİP · 3 KM</small></span
+              ><svg class="mode-arrow"><use href="#i-chevron" /></svg>
+            </button>
+          </nav>
+          <div class="menu-links">
+            <button id="open-settings">
+              <svg><use href="#i-settings" /></svg>AYARLAR</button
+            ><button id="how-to-play">
+              <svg><use href="#i-help" /></svg>KONTROLLER
+            </button>
+          </div>
+        </div>
+        <div class="bike-caption">
+          <span class="caption-line"></span><span class="eyebrow">SÜRÜŞE HAZIR</span
+          ><strong>IR—600<span>SPORT</span></strong>
+          <p>MANUEL DİREKSİYON <b>•</b> 3 KAMERA</p>
+        </div>
+        <div class="mode-brief">
+          <span id="menu-mode-name">SERBEST SÜRÜŞ</span>
+          <p id="mode-description">Açık yol. Sınırsız mesafe. Kendi tempon.</p>
+          <div class="best-record">
+            <span>KİŞİSEL EN İYİ</span><strong id="menu-best">İLK SÜRÜŞÜNÜ YAP</strong>
+          </div>
+        </div>
+        <div class="launch-dock">
+          <div class="route-summary">
+            <svg><use href="#i-road" /></svg
+            ><span
+              ><small>YOLCULUĞUNU HAZIRLA</small
+              ><strong id="menu-route-name">KEŞİF ROTASI</strong></span
+            >
+          </div>
+          <label class="launch-choice"
+            ><span>GÜZERGÂH</span
+            ><select id="biome-select" aria-label="Biyom">
+              <option value="auto">Keşif · Tüm rotalar</option>
               <option value="forest">Forest Road</option>
               <option value="coastal">Coastal Road</option>
               <option value="mountain">Mountain Pass</option>
               <option value="highland">Highland Road</option>
             </select></label
           >
-          <label class="biome-choice"
-            >TRAFİK
-            <select id="traffic-select" aria-label="Trafik yoğunluğu">
+          <label class="launch-choice"
+            ><span>TRAFİK</span
+            ><select id="traffic-select" aria-label="Trafik yoğunluğu">
               <option value="off">Kapalı</option>
-              <option value="low">Low · sakin</option>
-              <option value="medium" selected>Medium · canlı</option>
-              <option value="high">High · yoğun</option>
-              <option value="extreme">Extreme · çok yoğun</option>
+              <option value="low">Sakin</option>
+              <option value="medium">Normal</option>
+              <option value="high">Yoğun</option>
+              <option value="extreme">Ekstrem</option>
             </select></label
           >
-          <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
-          <div class="menu-links">
-            <button id="open-settings">AYARLAR</button><span>/</span
-            ><button id="how-to-play">NASIL OYNANIR</button>
-          </div>
-          <div class="intro-meta">
-            <span id="mode-description">Yolculuk senin ritminde.</span
-            ><span>INFINITE RIDE / 600</span>
-          </div>
+          <button class="primary start-button" id="start-button">
+            <span>SÜRÜŞE BAŞLA</span><svg><use href="#i-arrow" /></svg><kbd>ENTER</kbd>
+          </button>
         </div>
-        <div class="intro-bottom">
-          <span>Yolculuk senin ritminde.</span
-          ><span>W / A / S / D <b>ile sür</b> &nbsp; C <b>kamera</b></span>
-        </div>
+        <footer class="menu-footer">
+          <span>INFINITE RIDE <b>1.1</b></span
+          ><span><kbd>↑</kbd><kbd>↓</kbd> MOD SEÇ <i></i><kbd>ENTER</kbd> BAŞLA</span>
+        </footer>
       </section>
+
       <section class="hud" id="hud" hidden aria-label="Sürüş göstergeleri">
         <div class="route-label">
           <span class="eyebrow" id="mode-label">FREE RIDE</span
@@ -80,214 +171,285 @@
           ><span class="route-status" id="surface-label">ASFALT · İYİ TUTUŞ</span>
         </div>
         <div class="score-panel" id="score-panel" hidden>
-          <span class="small-label">SKOR</span><strong id="score">0</strong><b id="combo">×1.0</b>
+          <span class="small-label">SKOR</span>
+          <div><strong id="score">0</strong><b id="combo">×1.0</b></div>
+          <span class="score-accent"></span>
         </div>
         <div class="race-panel" id="race-panel" hidden>
-          <span class="small-label">YARIŞ · 3 KM</span><strong id="race-position">1 / 4</strong
-          ><span id="race-time">00:00.00</span>
+          <div class="race-position">
+            <small>POZİSYON</small><strong id="race-position">1 / 4</strong>
+          </div>
+          <span id="race-time">00:00.00</span>
           <div class="race-track"><i id="race-progress"></i></div>
           <small id="checkpoint-label">0 / 3 CHECKPOINT</small>
         </div>
         <div class="journey">
-          <span class="small-label">YOLCULUK</span
-          ><strong><span id="distance">0.00</span> <small>KM</small></strong
-          ><span class="journey-line"></span>
+          <span class="small-label">SÜRÜŞ MESAFESİ</span
+          ><strong><span id="distance">0.00</span><small>KM</small></strong
+          ><span class="camera-label"
+            ><svg><use href="#i-camera" /></svg><span id="camera-label">TAKİP KAMERASI</span></span
+          >
         </div>
         <div class="speedometer">
-          <div class="speed-top">
-            <span id="gear">N</span><span class="small-label">KM / H</span>
+          <div class="rpm-scale">
+            <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span
+            ><span>12</span>
           </div>
-          <div class="speed-value" id="speed">000</div>
           <div class="speed-bar"><i id="speed-bar"></i></div>
-          <div class="speed-bottom"><span id="drive-label">HAZIR</span><span>IR / 600</span></div>
+          <div class="speed-main">
+            <div class="gear-box"><small>VİTES</small><strong id="gear">N</strong></div>
+            <strong class="speed-value" id="speed">0</strong><span class="speed-unit">KM/H</span>
+          </div>
+          <div class="speed-bottom"><span id="drive-label">HAZIR</span><span>IR—600</span></div>
           <div class="nitro-meter">
-            <span id="nitro-label">NITRO · 100%</span><small>SHIFT</small>
+            <svg><use href="#i-bolt" /></svg><span id="nitro-label">NITRO · 100%</span
+            ><small>SHIFT</small>
             <div><i id="nitro-fill"></i></div>
           </div>
         </div>
-        <div class="ride-bottom">
-          <span class="camera-label"><i></i><span id="camera-label">TAKİP KAMERASI</span></span
-          ><span class="keyboard-help"
-            ><kbd>W</kbd> Gaz <kbd>S</kbd> Fren <kbd>A</kbd><kbd>D</kbd> Yön <kbd>C</kbd> Kamera
-            <kbd>R</kbd> Yola dön <kbd>Esc</kbd> Duraklat</span
-          >
+        <div class="keyboard-help">
+          <span><kbd>W</kbd> GAZ</span><span><kbd>S</kbd> FREN</span
+          ><span><kbd>A</kbd><kbd>D</kbd> YÖN</span><span><kbd>C</kbd> KAMERA</span
+          ><span><kbd>R</kbd> KURTAR</span>
         </div>
       </section>
-      <section class="pause overlay panel-overlay" id="pause" hidden aria-labelledby="pause-title">
-        <div class="panel">
-          <p class="eyebrow">BİR NEFES MOLASI</p>
-          <h2 id="pause-title">Yol bekler.</h2>
-          <p>Hazır olduğunda kaldığın yerden devam et.</p>
-          <button class="primary" id="resume-button">SÜRÜŞE DÖN <span>↗</span></button
-          ><button class="secondary" id="reset-button">Yeniden başla</button
-          ><button class="secondary" id="pause-settings">Ayarlar</button
-          ><button class="secondary" id="end-ride">Yolculuğu bitir</button
-          ><button class="text-button" id="menu-button">Başlangıca dön</button>
-          <div class="panel-note">
-            W / ↑ Gaz &nbsp; S / ↓ Fren &nbsp; A D / ← → Yön<br />C / V Kamera &nbsp; R Yola dön
-            &nbsp; F3 Telemetri
+
+      <section
+        class="pause overlay panel-overlay"
+        id="pause"
+        role="dialog"
+        aria-modal="true"
+        hidden
+        aria-labelledby="pause-title"
+      >
+        <div class="game-panel pause-panel">
+          <div class="panel-title">
+            <span class="eyebrow">SÜRÜŞ DURAKLATILDI</span>
+            <h2 id="pause-title">MOLA<br /><em>ZAMANI.</em></h2>
+            <p>Yol kaldığın yerden devam ediyor.</p>
+            <div class="pause-telemetry">
+              <span>MESAFE<strong id="pause-distance">0.00 KM</strong></span
+              ><span>MAKSİMUM HIZ<strong id="pause-max">0 KM/H</strong></span>
+            </div>
+          </div>
+          <div class="pause-actions">
+            <button class="primary" id="resume-button">
+              <span>DEVAM ET</span><svg><use href="#i-arrow" /></svg></button
+            ><button class="secondary" id="reset-button">YENİDEN BAŞLAT<span>01</span></button
+            ><button class="secondary" id="pause-settings">
+              AYARLAR<svg><use href="#i-settings" /></svg></button
+            ><button class="secondary" id="end-ride">
+              SÜRÜŞÜ BİTİR<svg><use href="#i-flag" /></svg></button
+            ><button class="text-button" id="menu-button">ANA MENÜYE DÖN</button
+            ><small class="panel-note"><kbd>ESC</kbd> DEVAM ET</small>
           </div>
         </div>
       </section>
+
       <div class="toast" id="toast" role="status" hidden></div>
       <div id="countdown" class="countdown" hidden>3</div>
-      <section class="overlay panel-overlay" id="results" hidden aria-labelledby="result-title">
-        <div class="panel results-panel">
-          <p class="eyebrow" id="result-mode">FREE RIDE</p>
-          <h2 id="result-title">İyi yolculuktu.</h2>
+      <section
+        class="overlay panel-overlay"
+        id="results"
+        role="dialog"
+        aria-modal="true"
+        hidden
+        aria-labelledby="result-title"
+      >
+        <div class="game-panel results-panel">
+          <div class="results-heading">
+            <span class="eyebrow" id="result-mode">FREE RIDE</span><svg><use href="#i-flag" /></svg>
+            <h2 id="result-title">SÜRÜŞ TAMAMLANDI</h2>
+            <p class="record-label" id="result-record"></p>
+          </div>
           <div class="result-stats" id="result-stats"></div>
-          <p class="record-label" id="result-record"></p>
-          <button class="primary" id="result-retry">YENİDEN SÜR <span>↗</span></button
-          ><button class="text-button" id="result-menu">Ana menü</button>
+          <div class="result-actions">
+            <button class="text-button" id="result-menu">ANA MENÜ</button
+            ><button class="primary" id="result-retry">
+              <span>YENİDEN SÜR</span><svg><use href="#i-arrow" /></svg>
+            </button>
+          </div>
         </div>
       </section>
       <section class="overlay panel-overlay crash-overlay" id="crash" hidden>
-        <div class="panel">
-          <p class="eyebrow">BİR SONRAKİ VİRAJDA DAHA SAKİN</p>
-          <h2>Kaza!</h2>
-          <p>Yolculuk burada bitmek zorunda değil.</p>
-          <button class="primary" id="crash-recover">YOLA DÖN <span>↗</span></button>
-          <p>R · güvenli dönüş</p>
+        <div class="game-panel crash-panel">
+          <span class="incident-number">!</span>
+          <p class="eyebrow">SÜRÜŞ KESİLDİ</p>
+          <h2>KAZA<br /><em>YAPTIN.</em></h2>
+          <p>Motoru güvenli bir noktaya al ve yeniden yola çık.</p>
+          <button class="primary" id="crash-recover">
+            <span>YOLA DÖN</span><svg><use href="#i-arrow" /></svg><kbd>R</kbd>
+          </button>
         </div>
       </section>
       <pre id="debug" hidden></pre>
       <div id="touch-controls" hidden aria-label="Dokunmatik sürüş kontrolleri">
-        <button data-control="nitro" class="touch-nitro" aria-label="Nitro">NITRO</button>
+        <button data-control="nitro" class="touch-nitro" aria-label="Nitro">
+          <svg><use href="#i-bolt" /></svg>NITRO
+        </button>
         <div class="touch-steer">
-          <button data-control="left" aria-label="Sola dön">◀</button
-          ><button data-control="right" aria-label="Sağa dön">▶</button>
+          <button data-control="left" aria-label="Sola dön">
+            <svg class="flip"><use href="#i-chevron" /></svg></button
+          ><button data-control="right" aria-label="Sağa dön">
+            <svg><use href="#i-chevron" /></svg>
+          </button>
         </div>
         <button class="touch-camera" id="touch-camera" aria-label="Kamerayı değiştir">
-          KAMERA
+          <svg><use href="#i-camera" /></svg>
         </button>
         <div class="touch-pedals">
           <button data-control="brake" aria-label="Fren">FREN</button
-          ><button data-control="throttle" aria-label="Gaz">GAZ</button>
+          ><button data-control="throttle" aria-label="Gaz">
+            <svg><use href="#i-chevron" /></svg>GAZ
+          </button>
         </div>
       </div>
-      <section class="error overlay panel-overlay" id="error" hidden>
-        <div class="panel">
-          <p class="eyebrow">GÖRÜNTÜ BAŞLATILAMADI</p>
-          <h2>Bir teknik mola.</h2>
-          <p id="error-message"></p>
-          <button class="primary" id="reload-button">Yeniden yükle <span>↗</span></button>
-        </div>
-      </section>
+
       <section
         class="overlay panel-overlay settings-overlay"
         id="settings"
+        role="dialog"
+        aria-modal="true"
         hidden
         aria-labelledby="settings-title"
       >
-        <div class="settings-panel">
+        <div class="game-panel settings-panel">
           <div class="settings-heading">
             <div>
-              <p class="eyebrow">SENİN YOLCULUĞUN</p>
-              <h2 id="settings-title">Ayarlar</h2>
+              <span class="eyebrow">SÜRÜŞ TERCİHLERİ</span>
+              <h2 id="settings-title">AYARLAR</h2>
             </div>
-            <button id="settings-close" class="icon-button" aria-label="Ayarları kapat">×</button>
+            <button id="settings-close" class="icon-button" aria-label="Ayarları kapat">
+              <svg><use href="#i-close" /></svg>
+            </button>
           </div>
           <form id="settings-form">
-            <div class="settings-grid">
-              <label
-                >GRAFİK KALİTESİ<select name="quality">
-                  <option value="low">Düşük</option>
-                  <option value="medium">Orta</option>
-                  <option value="high">Yüksek</option>
-                </select></label
-              >
-              <label
-                >KAMERA<select name="camera">
-                  <option value="0">Takip</option>
-                  <option value="1">Kask</option>
-                  <option value="2">Sinematik</option>
-                </select></label
-              >
-              <label
-                >GÜZERGÂH<select name="biome">
-                  <option value="auto">Keşif · tüm biyomlar</option>
-                  <option value="forest">Forest Road</option>
-                  <option value="coastal">Coastal Road</option>
-                  <option value="mountain">Mountain Pass</option>
-                  <option value="highland">Highland Road</option>
-                </select></label
-              >
-              <label
-                >TRAFİK<select name="traffic">
-                  <option value="off">Kapalı</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="extreme">Extreme</option>
-                </select></label
-              >
-              <label
-                >GÜNÜN SAATİ<select name="time">
-                  <option value="sunrise">Gün doğumu</option>
-                  <option value="day">Gündüz</option>
-                  <option value="sunset">Gün batımı</option>
-                  <option value="night">Gece</option>
-                  <option value="dynamic">Dinamik döngü</option>
-                </select></label
-              >
-              <label
-                >HAVA<select name="weather">
-                  <option value="clear">Açık</option>
-                  <option value="haze">Puslu</option>
-                </select></label
-              >
-              <label
-                >ÇÖZÜNÜRLÜK ÖLÇEĞİ <output data-for="resolution">100%</output
-                ><input name="resolution" type="range" min="0.5" max="1.5" step="0.05"
-              /></label>
-              <label
-                >SES SEVİYESİ <output data-for="volume">45%</output
-                ><input name="volume" type="range" min="0" max="1" step="0.01"
-              /></label>
-              <label
-                >KONTROL HASSASİYETİ <output data-for="sensitivity">1.0×</output
-                ><input name="sensitivity" type="range" min="0.6" max="1.6" step="0.1"
-              /></label>
+            <div class="settings-scroll">
+              <fieldset>
+                <legend><span>01</span> GÖRÜNTÜ</legend>
+                <div class="settings-grid">
+                  <label
+                    >GRAFİK KALİTESİ<select name="quality">
+                      <option value="low">Düşük</option>
+                      <option value="medium">Orta</option>
+                      <option value="high">Yüksek</option>
+                    </select></label
+                  ><label
+                    >KAMERA<select name="camera">
+                      <option value="0">Takip</option>
+                      <option value="1">Kask</option>
+                      <option value="2">Sinematik</option>
+                    </select></label
+                  ><label
+                    >GÜNÜN SAATİ<select name="time">
+                      <option value="sunrise">Gün doğumu</option>
+                      <option value="day">Gündüz</option>
+                      <option value="sunset">Gün batımı</option>
+                      <option value="night">Gece</option>
+                      <option value="dynamic">Dinamik döngü</option>
+                    </select></label
+                  ><label
+                    >HAVA<select name="weather">
+                      <option value="clear">Açık</option>
+                      <option value="haze">Puslu</option>
+                    </select></label
+                  ><label class="range-setting"
+                    >ÇÖZÜNÜRLÜK <output data-for="resolution">100%</output
+                    ><input name="resolution" type="range" min="0.5" max="1.5" step="0.05"
+                  /></label>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend><span>02</span> SÜRÜŞ</legend>
+                <div class="settings-grid">
+                  <label
+                    >GÜZERGÂH<select name="biome">
+                      <option value="auto">Keşif · Tüm rotalar</option>
+                      <option value="forest">Forest Road</option>
+                      <option value="coastal">Coastal Road</option>
+                      <option value="mountain">Mountain Pass</option>
+                      <option value="highland">Highland Road</option>
+                    </select></label
+                  ><label
+                    >TRAFİK<select name="traffic">
+                      <option value="off">Kapalı</option>
+                      <option value="low">Sakin</option>
+                      <option value="medium">Normal</option>
+                      <option value="high">Yoğun</option>
+                      <option value="extreme">Ekstrem</option>
+                    </select></label
+                  ><label class="range-setting"
+                    >DİREKSİYON HASSASİYETİ <output data-for="sensitivity">1.0×</output
+                    ><input name="sensitivity" type="range" min="0.6" max="1.6" step="0.1"
+                  /></label>
+                </div>
+                <p class="settings-note" id="settings-lock" hidden>
+                  Yarış sırasında güzergâh ve trafik değiştirilemez.
+                </p>
+              </fieldset>
+              <fieldset>
+                <legend><span>03</span> SES</legend>
+                <div class="settings-grid">
+                  <label class="range-setting"
+                    >ANA SES SEVİYESİ <output data-for="volume">45%</output
+                    ><input name="volume" type="range" min="0" max="1" step="0.01"
+                  /></label>
+                  <p class="settings-note">Motor, rüzgâr, trafik ve oyun efektleri.</p>
+                </div>
+              </fieldset>
             </div>
-            <p class="settings-note" id="settings-lock" hidden>
-              Yarış sırasında güzergâh ve trafik sabit kalır.
-            </p>
-            <p class="settings-note">
-              Güzergâh değişirse motosiklet güvenle sağ şeride alınır. Ayarların bu cihazda
-              saklanır.
-            </p>
-            <button class="primary" type="submit">UYGULA VE DÖN <span>↗</span></button>
+            <div class="settings-footer">
+              <p>
+                Güzergâh değişirse motor sağ şeride alınır.<br />Tercihlerin bu cihazda saklanır.
+              </p>
+              <button class="primary" type="submit">
+                <span>UYGULA</span><svg><use href="#i-arrow" /></svg>
+              </button>
+            </div>
           </form>
         </div>
       </section>
       <section
         class="overlay panel-overlay settings-overlay"
         id="help"
+        role="dialog"
+        aria-modal="true"
         hidden
         aria-labelledby="help-title"
       >
-        <div class="settings-panel help-panel">
-          <p class="eyebrow">YOLA ÇIKMADAN ÖNCE</p>
-          <h2 id="help-title">Ritmini bul.</h2>
-          <p>
-            <kbd>W / ↑</kbd> Gazı basılı tut. <kbd>S / ↓</kbd> Frenle.<br /><kbd>A D / ← →</kbd>
-            Yönel. <kbd>Shift</kbd> Nitro.<br /><kbd>C / V</kbd> Kamera. <kbd>Esc</kbd> Duraklat.
-            <kbd>R</kbd> Kurtar.
+        <div class="game-panel help-panel">
+          <span class="eyebrow">DİREKSİYON SENDE</span>
+          <h2 id="help-title">KONTROLLER</h2>
+          <div class="control-grid">
+            <span><kbd>W / ↑</kbd><strong>GAZ</strong></span
+            ><span><kbd>S / ↓</kbd><strong>FREN</strong></span
+            ><span><kbd>A D / ← →</kbd><strong>DİREKSİYON</strong></span
+            ><span><kbd>SHIFT</kbd><strong>NITRO</strong></span
+            ><span><kbd>C / V</kbd><strong>KAMERA</strong></span
+            ><span><kbd>R</kbd><strong>KURTARMA</strong></span>
+          </div>
+          <p class="driving-note">
+            Motor kendi kendine viraj almaz. A/D ile yön ver, tuşu bıraktığında dönüş sönümlenir.
+            Keskin virajdan önce frenle. Toprakta tutuş azalır.
           </p>
-          <p>
-            <strong>Free Ride</strong> — Sonsuz yol, istediğin tempo. Trafiği ve ortamı ayarlardan
-            seç.<br /><strong>Traffic Rush</strong> — Hız, sollama, yakın geçiş ve karşı şeritte
-            risk puan getirir. Combo 7 saniyede söner; kaza sürüşü bitirir.<br /><strong
-              >Race</strong
-            >
-            — Üç rakibe karşı 3 km. Kontrol noktalarını geç ve bitişe ulaş. Kurtarma +3 saniye ceza
-            getirir.
-          </p>
-          <p>
-            Virajdan önce yavaşla. Toprakta tutuş azalır. Nitro gazla birlikte çalışır; bıraktığında
-            yeniden dolar. Dokunmatik cihazda gaz ve yön düğmelerini birlikte kullanabilirsin.
-          </p>
-          <button class="primary" id="help-close">HAZIRIM <span>↗</span></button>
+          <div class="help-modes">
+            <p><strong>FREE RIDE</strong>Sonsuz yol. Kendi tempon.</p>
+            <p><strong>TRAFFIC RUSH</strong>Solla, yakın geç, combo yap. Kaza sürüşü bitirir.</p>
+            <p><strong>RACE</strong>3 rakip, 3 km. Kontrol noktalarını geç. Kurtarma +3 saniye.</p>
+          </div>
+          <button class="primary" id="help-close">
+            <span>ANLAŞILDI</span><svg><use href="#i-arrow" /></svg>
+          </button>
+        </div>
+      </section>
+      <section class="error overlay panel-overlay" id="error" hidden>
+        <div class="game-panel crash-panel">
+          <span class="eyebrow">TEKNİK MOLA</span>
+          <h2>GÖRÜNTÜ<br />BAŞLATILAMADI</h2>
+          <p id="error-message"></p>
+          <button class="primary" id="reload-button">
+            <span>YENİDEN YÜKLE</span><svg><use href="#i-arrow" /></svg>
+          </button>
         </div>
       </section>
     </main>

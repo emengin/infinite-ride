@@ -22,7 +22,12 @@ test('all daylight states are distinct and dynamic cycle is smooth and bounded',
   assert.equal(Object.keys(TIMES).length, 4);
 });
 test('nitro supplies real acceleration, drains, locks at empty and recharges on release', () => {
-  const p = new RoadPath(),
+  class StraightRoad extends RoadPath {
+    center(s) {
+      return { x: 0, y: 0, z: -s };
+    }
+  }
+  const p = new StraightRoad(),
     normal = new MotorcyclePhysics(p),
     boost = new MotorcyclePhysics(p);
   normal.state.speed = boost.state.speed = 45;

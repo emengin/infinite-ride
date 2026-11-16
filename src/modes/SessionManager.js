@@ -1,6 +1,6 @@
 export const MODES = {
-  free: { label: 'FREE RIDE', description: 'Yolculuk senin ritminde.' },
-  rush: { label: 'TRAFFIC RUSH', description: 'Yakın geç. Riski puana çevir.' },
+  free: { label: 'FREE RIDE', description: 'Rotanı seç. Sonsuz yolda özgürce sür.' },
+  rush: { label: 'TRAFFIC RUSH', description: 'Trafiği solla, yakın geçişlerle combonu artır.' },
   race: { label: 'RACE', description: '3 rakip. 3 kilometre. Bir bitiş çizgisi.' },
 };
 export class SessionManager {

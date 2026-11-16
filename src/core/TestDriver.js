@@ -3,7 +3,41 @@ import { VEHICLES } from '../traffic/TrafficSimulation.js';
 // Explicit ?test=1 only. Scenario arrangement and accelerated fixed-step driving
 // exercise the same game systems as keyboard input; never used by normal play.
 export function createTestDriver(game) {
+  const originalSample = game.input.sample;
+  // Explicit test-only controls, shared by accelerated and real-time test rides.
+  // The normal input manager and player physics never enable this controller.
+  const driveInput = (targetSpeed) => {
+    const st = game.physics.state;
+    const curve = Math.max(
+      Math.abs(game.path.frame(st.s + 30).curvature),
+      Math.abs(game.path.frame(st.s + 60).curvature),
+    );
+    let target = Math.min(targetSpeed, Math.sqrt(7 / Math.max(curve, 0.0001)));
+    const actors = [
+      ...game.traffic.simulation.actors,
+      ...(game.playMode === 'race' ? game.race.actors : []),
+    ];
+    for (const a of actors)
+      if (a.s > st.s && Math.abs(a.d - st.d) < a.halfWidth + 0.6)
+        target = Math.min(
+          target,
+          Math.max(0, a.speed * a.dir + (a.s - st.s - a.halfLength - 5) * 0.55),
+        );
+    const desiredError = Math.max(-0.14, Math.min(0.14, (2.3 - st.d) * 0.07));
+    const wantedYaw =
+      game.path.frame(st.s).curvature * st.speed + (desiredError - st.headingError) * 3.8;
+    const steer = wantedYaw / Math.max(0.04, game.physics.steeringRate(st.speed));
+    return {
+      throttle: Math.max(0, Math.min(1, 0.4 + (target - st.speed) * 0.3)),
+      brake: Math.max(0, Math.min(1, (st.speed - target) / 5)),
+      steer: Math.max(-1, Math.min(1, steer)),
+    };
+  };
   return Object.freeze({
+    realtimeDrive(targetSpeed = null) {
+      game.input.clear();
+      game.input.sample = targetSpeed === null ? originalSample : () => driveInput(targetSpeed);
+    },
     resetPerformance() {
       game.performance.apply(game.settings);
       game.lastTime = 0;
@@ -25,6 +59,8 @@ export function createTestDriver(game) {
     player(values) {
       game.physics.reset(values.s ?? 24);
       Object.assign(game.physics.state, values);
+      game.physics.state.heading =
+        game.path.frame(game.physics.state.s).heading + (values.headingError || 0);
       game.physics.state.prevS = game.physics.state.s;
       game.physics.state.prevD = game.physics.state.d;
       game.camera.rebase(game.world.update(game.physics.state.s));
@@ -71,28 +107,8 @@ export function createTestDriver(game) {
     drive(seconds, targetSpeed = 30) {
       for (let i = 0; i < Math.round(seconds * 120); i++) {
         if (game.mode !== 'running') break;
-        const st = game.physics.state,
-          curve = Math.max(
-            Math.abs(game.path.frame(st.s + 30).curvature),
-            Math.abs(game.path.frame(st.s + 60).curvature),
-          );
-        let target = Math.min(targetSpeed, Math.sqrt(7 / Math.max(curve, 0.0001)));
-        const actors = [
-          ...game.traffic.simulation.actors,
-          ...(game.playMode === 'race' ? game.race.actors : []),
-        ];
-        for (const a of actors)
-          if (a.s > st.s && Math.abs(a.d - st.d) < a.halfWidth + 0.6)
-            target = Math.min(
-              target,
-              Math.max(0, a.speed * a.dir + (a.s - st.s - a.halfLength - 5) * 0.55),
-            );
-        game.step(1 / 120, {
-          throttle: Math.max(0, Math.min(1, 0.4 + (target - st.speed) * 0.3)),
-          brake: Math.max(0, Math.min(1, (st.speed - target) / 5)),
-          steer: Math.max(-1, Math.min(1, (2.3 - st.d) * 0.65)),
-        });
-        if (i % 120 === 0) game.camera.rebase(game.world.update(st.s));
+        game.step(1 / 120, driveInput(targetSpeed));
+        if (i % 120 === 0) game.camera.rebase(game.world.update(game.physics.state.s));
       }
       game.camera.rebase(game.world.update(game.physics.state.s));
       return game.snapshot();

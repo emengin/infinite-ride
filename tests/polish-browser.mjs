@@ -47,7 +47,7 @@ try {
   assert.ok(idle.atmosphere.headlight > 50);
   checks.push('synthesized audio signal and real nighttime headlight');
   await page.keyboard.down('w');
-  await page.waitForTimeout(6500);
+  await page.waitForTimeout(2500);
   const moving = await page.evaluate(() => window.__ride.snapshot());
   assert.ok(moving.audio.rpm > idle.audio.rpm);
   assert.ok(moving.audio.wind > idle.audio.wind);

@@ -1,6 +1,6 @@
 # INFINITE RIDE
 
-**The Road Never Ends.** — v1.0.0
+**The Road Never Ends.** — v1.1.0
 
 Three.js ile geliştirilmiş, tamamen tarayıcıda çalışan bağımsız bir motosiklet oyunu. Sonsuz yollar, dört procedural biyom, iki yönlü trafik ve üç oynanabilir mod içerir. Backend, hesap, ücretli API veya oyun sırasında CDN'den indirilen varlık gerekmez.
 
@@ -49,7 +49,9 @@ Rakipler aynı yol yüzeyi ve motosiklet fiziğini kullanır. Trafik araçların
 
 Dokunmatik cihazlarda gaz, fren, yön, nitro, kamera ve duraklatma düğmeleri bulunur. Gaz ve yön birlikte tutulabilir. Portre ve yatay yerleşim desteklenir. Pencere veya sekme odağı kaybolunca oyun duraklar ve girdiler bırakılır.
 
-Normal hızlarda viraj yardımı rahat sürüş sağlar. Yüksek hızda tutuş sınırı aşılabilir; virajdan önce frenleyin. Toprakta hızlanma ve tutuş azalır. Bariyer, ağaç/kaya veya araçla çarpışma görünür ve sesli tepki oluşturur. Free Ride ve Race'te güvenli dönüş mümkündür; Rush'ta kaza sonuç ekranına götürür.
+Direksiyon tamamen manueldir: motor yolu kendi kendine takip etmez, tuş bırakıldığında kendiliğinden sağa/sola dönmez. Virajları A/D veya yön tuşlarıyla alın; kamera oyuncunun sürüş yönünü izler. Yüksek hızda tutuş sınırı aşılabilir; virajdan önce frenleyin. Toprakta hızlanma ve tutuş azalır. Bariyer, ağaç/kaya veya araçla çarpışma görünür ve sesli tepki oluşturur. Free Ride ve Race'te güvenli dönüş mümkündür; Rush'ta kaza sonuç ekranına götürür.
+
+v1.1 arayüzü motosikleti gösteren ana menü, üç mod kartı, rota/trafik seçim alanı, dijital hız/devir/nitro göstergesi ve yeni duraklatma/ayar/sonuç ekranları içerir. Ana menüde ↑/↓ mod değiştirir, Enter sürüşü başlatır. Sağ üst düğme desteklenen tarayıcılarda tam ekranı açıp kapatır. Portre ve yatay dokunmatik yerleşimler ayrıca düzenlenmiştir.
 
 ## Dünya ve ayarlar
 
@@ -81,7 +83,7 @@ Varsayılan yol seed'i **7049**. Aynı seed ve biyom seçimi aynı yolu üretir.
 npm test
 ```
 
-31 Node testi; FPS bağımsız fizik, gerçek asfalt mesh'ine raycast ile temas, yol birleşimleri, seed, biyom geçişleri, köprü/tünel, kaynak havuzları, trafik/sollama/çarpışma, yarış AI'sı, skor/kayıt, nitro ve saat döngüsünü kapsar.
+34 Node testi; FPS bağımsız fizik, gerçek asfalt mesh'ine raycast ile temas, yol birleşimleri, seed, biyom geçişleri, köprü/tünel, kaynak havuzları, trafik/sollama/çarpışma, yarış AI'sı, skor/kayıt, nitro ve saat döngüsünü kapsar. Yeni regresyonlar girdisiz yön/yatış, tuş bırakma sonrası salınım ve dünya sınırında otomatik yön düzeltme olmamasını doğrular. Gaz/fren/nitro testleri düz bir yol fikstüründe, AI yol yardımı ayrıca açıkça etkinleştirilerek test edilir.
 
 Tarayıcı testleri için bir kez:
 
@@ -122,7 +124,7 @@ Vite **`base: './'`** kullanır. Hem kullanıcı kökü hem `https://kullanici.g
 ## Bilinen sınırlar
 
 - Görsel tarz özgün, stilize procedural geometridir; fotogerçekçi taranmış/GLB varlık paketi değildir.
-- Fizik arcade yol yardımı, yüzey takibi ve yönlü kutu çarpışmaları kullanır. Tam rijit cisim/ragdoll simülasyonu yoktur.
+- Fizik manuel arcade direksiyon, yüzey takibi ve yönlü kutu çarpışmaları kullanır. AI rakipler açıkça etkinleştirilen yol yardımı kullanır. Tam rijit cisim/ragdoll simülasyonu yoktur.
 - Yol her yönde bir şerittir. Genişleyen çok şeritli otoyollar bu sürümde yoktur.
 - Sesler dinamiktir ancak sentezlenmiştir; gerçek motosiklet kayıtları kullanılmaz.
 - Gerçek mobil donanım, Safari/Firefox, saatler süren duvar saati oynanışı ve canlı GitHub dağıtımı ayrıca doğrulanmalıdır.

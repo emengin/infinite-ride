@@ -79,7 +79,10 @@ export class Game {
       },
       help: () => this.ui.help(true),
       closeHelp: () => this.ui.help(false),
+      fullscreen: () => this.fullscreen(),
     });
+    this.ui.records(this.save.read('records', {}));
+    this.ui.route(this.settings.biome);
     this.selectMode(this.playMode);
     document.getElementById('biome-select').value = this.path.biomes.choice;
     document.getElementById('traffic-select').value = this.traffic.simulation.density;
@@ -172,6 +175,15 @@ export class Game {
     this.camera.rebase(this.world.update(24));
     this.camera.initialized = false;
     this.setMode('intro');
+    this.ui.records(this.save.read('records', {}));
+  }
+  async fullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      this.ui.toast('Tam ekran bu tarayıcıda kullanılamıyor.');
+    }
   }
   action(action) {
     if (action === 'pause' && !document.getElementById('settings').hidden) {
@@ -295,6 +307,7 @@ export class Game {
     this.performance.apply(next);
     document.getElementById('biome-select').value = next.biome;
     document.getElementById('traffic-select').value = next.traffic;
+    this.ui.route(next.biome);
     this.save.write('settings', next);
     this.audio.effect('menu');
   }
