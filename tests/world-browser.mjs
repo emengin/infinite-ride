@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
+const base = process.env.RIDE_URL || 'http://127.0.0.1:4173/';
 const browser = await chromium.launch({
   args: process.platform === 'win32' ? ['--use-angle=d3d11', '--enable-gpu'] : [],
 });
@@ -14,7 +15,7 @@ try {
     page.on('console', (m) => {
       if (m.type() === 'error') errors.push(m.text());
     });
-    await page.goto(`http://127.0.0.1:4173/?biome=${biome}&debug=1`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}?biome=${biome}&debug=1`, { waitUntil: 'networkidle' });
     await page.keyboard.press('F3');
     await page.locator('#start-button').click();
     await page.keyboard.press('c');

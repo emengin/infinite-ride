@@ -1,77 +1,78 @@
-# Aşama 1 doğrulama raporu
+# INFINITE RIDE v1.0.0 — Doğrulama
 
-Tarih: **16 Kasım 2026**. Sürüm: **0.1.0**. Yalnızca Aşama 1 kapsamı.
+**16 Kasım 2026 · Aşama 1–6**
 
-## Sonuç
+## Son sonuçlar
 
-| Kontrol                | Sonuç                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------ |
-| `npm install`          | Başarılı; kurulumda 0 güvenlik açığı bildirildi                                |
-| `npm run dev`          | Yerel Vite sunucusu başlatıldı, oyun çalıştı                                   |
-| `npm test`             | **12/12 geçti**                                                                |
-| `npm run build`        | Başarılı; üretim paketi `dist/` içinde                                         |
-| `npm run test:browser` | Üretim derlemesinde **21/21 kontrol geçti**                                    |
-| `npm run test:pages`   | `/renamed-infinite-ride/` alt yolunda oyun açıldı ve sürüldü; hatalı istek yok |
-| Tarayıcı konsolu       | Son üretim testinde JavaScript/WebGL hatası yok                                |
-| Varlık yüklemeleri     | Son üretim testinde başarısız istek / HTTP hata durumu yok                     |
+| Denetim             | Sonuç                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `npm install`       | Başarılı; 19 paket denetlendi, 0 güvenlik açığı bildirildi                           |
+| `npm test`          | **31 / 31 geçti**                                                                    |
+| `npm run build`     | Başarılı; `dist/` hazır                                                              |
+| `npm run test:e2e`  | Yedi tarayıcı test dosyası başarılı                                                  |
+| Çekirdek oynanış    | **21 kontrol**; gaz/fren/yön/kamera, gerçek sürüş/rebase, pause/restart ve dokunma   |
+| Dünya               | **4 biyom** render/konsol kontrolü ve görsel inceleme                                |
+| Trafik              | **6 senaryo**; yedi model, kaza/kurtarma, yakın geçiş ve durağan oyuncuya gelen araç |
+| Modlar              | **6 senaryo**; serbest sürüş, Rush puan/kayıt/sonuç ve gerçek 3 km yarış bitişi      |
+| Polish              | **8 kontrol**; ses çıkışı/RPM/rüzgâr/mute, ayarlar, nitro ve dört saat               |
+| Yaşam döngüsü/mobil | **3 kapsamlı kontrol**; köprü/tünel, GPU/listener temizliği, portre/yatay ekran      |
+| Pages               | `/renamed-infinite-ride/` altında üretim paketi açıldı ve sürüldü; hatalı istek yok  |
 
-Build sırasında Three.js vendor paketi için 500 kB parça boyutu uyarısı var. Paket yaklaşık **544.52 kB minify / 134.99 kB gzip**; derleme başarılı. Bu bir eksik import veya çalışma hatası değil.
+Son e2e paketinde JavaScript/WebGL konsol hatası veya runtime exception görülmedi. Asset ve üretim alt-yol yüklemeleri geçti. Three.js vendor parçası yaklaşık **546.46 kB minify / 135.44 kB gzip**; Vite'nin 500 kB uyarısı motor paketinin büyüklüğüdür, build başarısızlığı değildir.
 
-## Fizik ve sonsuz yol
+## Fizik, yol ve AI kapsamı
 
-Node testleri şunları doğruladı:
+- Seed tutarlılığı; 100 km yol sürekliliği ve eğim/eğrilik sınırları.
+- Arazi üçgen interpolasyonu ve bitişik asfalt mesh kenarlarının birleşmesi.
+- Dört biyomda gerçek asfalt mesh'ine aşağı raycast; fizik temas yüksekliği ile görünür asfalt eşleşiyor. Köprü ve tünel örnekleri dahil.
+- Kademeli gaz, sürtünme/motor freni, fren, FPS bağımsız direksiyon/yatma, yol dışı tutuş, kurtarma.
+- 30/60/144 FPS render adımlarının aynı 120 Hz fizik sonucunu üretmesi.
+- Yaklaşık 80 km/h test sürücüsü ile 10 km üzeri simülasyon.
+- 50 km yol parçası geri dönüşümü ve 10.000 km koordinata rebase: 12 grup/geometri kimliği korunuyor; GPU'ya giden koordinatlar küçük kalıyor.
+- Yedi araç türü, yoğunluk hedefleri ve iki yön; güvenli uzak spawn.
+- Frenleyen takip AI'sı, açık yolda tamamlanan sollama ve şeride dönüş; konvoyda dönüş alanı yoksa manevranın reddi.
+- On simüle dakika boyunca 56 araçlık havuzun sabit kalması ve aynı şeritte gövde çakışmaması.
+- Yüksek hızda süpürülmüş kutu çarpışması ve dar ama çarpışmasız geçiş.
+- Canlı trafik ile yarış AI'sında NPC gövde çakışmaması, bitiren rakiplerin ilerlemeye devam etmesi.
+- Rush puan kaynakları/combo sonlanması, yarış kontrol noktaları/sıralama/bitiş, bozuk/kapalı depolama toleransı.
+- Nitro gücü, yakıt boşalması/kilidi/yenilenmesi; dinamik gün döngüsü ve bozuk ayarların sınırlandırılması.
 
-- Aynı seed aynı yol; farklı seed farklı yol üretir.
-- 100 km boyunca yol örnekleri sonlu ve süreklidir; eğim/eğrilik sınırları korunur.
-- Fizik yüzeyi, render edilen arazinin aynı köşe/köşegenleriyle üçgen interpolasyonu kullanır.
-- Bitişik yol mesh'lerinin kenarları, uzak koordinatlar dahil, tolerans içinde birleşir.
-- Gaz kademeli hızlandırır; gaz bırakma yavaşlatır; fren daha güçlü yavaşlatır ve geri gitmez.
-- Direksiyon, hareket yönünü ve ardından yanal konumu değiştirir; dururken yana kaydırmaz.
-- Yaklaşık 80 km/h test sürücüsüyle **10 km üzeri hızlandırılmış sürüşte** yol takibi ve görünen yükseklik tutarlıdır.
-- Yol dışı hızlanma azalır; R kurtarması mesafeyi koruyarak şeride döner.
-- Aynı 16 saniyelik girdi **30, 60 ve 144 FPS** render adımlarında aynı fizik sonucunu verir.
-- Uzun tab suspension zaman sıçraması sınırlanır; birikmiş fizik zamanı temizlenir.
-- Yüksek hızlı takip kamerası floating-origin değişimi boyunca motosikleti yakın tutar.
-- **50 km** boyunca yol parçası yenileme ve **10.000 km** koordinata sıçrama sonrası havuz **12 parça** olarak kalır; sahne nesneleri/geometri kimlikleri yeniden kullanılır, yerel koordinatlar küçük kalır.
+## Tarayıcı ve görsel doğrulama
 
-Bu mesafeler hızlandırılmış otomatik simülasyondur. Gerçekte saatlerce oyun oynandığı veya tarayıcı belleğinin saatlerce profillendiği anlamına gelmez.
+Gerçek Chromium 159 render motoru kullanıldı. Masaüstü 1440×900; Windows D3D11 / **NVIDIA GeForce RTX 5060**. İlk otomatik çekirdek gaz testinde yaklaşık 620 m sürüş ve 205 km/h görüldü; kamera FOV, yol parçası döngüsü ve 512 m origin geçişi doğrulandı.
 
-## Chromium oynanış testi
+Free Ride 1.5 km üzerinde devam etti. Race geri sayımdan sonra hızlandırılmış gerçek fizik sürücüsüyle **3 km güzergâhı**, üç kontrol noktasını ve bitişi tamamladı. Rush'ta yakın geçiş puanı alındı, kaza sonuç ekranını açtı ve rekor localStorage'da doğrulandı. Bunlar sonuç ekranını doğrudan çağıran sahte testler değildir; gerçek Game.step sistemleri çalıştırılır. Kontrollü trafik/başlangıç düzenlemesi yalnızca `?test=1&debug=1` ile açılan test sürücüsünde yapılır.
 
-Gerçek Chromium 159 render motoru, Windows, 1440×900 masaüstü görünümü; D3D11 üzerinden **NVIDIA GeForce RTX 5060**.
+390×844 portre ve 844×390 yatay dokunmatik emülasyonu denendi. Gerçek CDP touch olaylarıyla eşzamanlı gaz/direksiyon test edildi. Yardım/ayarlar/başlat/pause düğmelerinin erişimi ve ekran içindeki yerleşimi kontrol edildi.
 
-Son gerçek zamanlı gaz testinde:
+İncelenen görüntüler: başlangıç, dört biyom, üç kamera, yedi trafik modeli, kaza, yarış/Rush sonuçları, dört saat, gece kask/far, ayarlar, köprü/tünel ve iki mobil yön. Son görüntüler `artifacts/` klasöründe.
 
-- Yaklaşık **620 m** ilerleme ve **205 km/h** hıza ulaşma.
-- **512 m origin** değişimi ve yeni yol parçası geri dönüşümü.
-- Ölçüm anında yaklaşık **60.0 FPS**, **131 draw call**, **76 GPU geometrisi**, **12 aktif parça**.
-- Hıza tepki veren FOV ve motosikleti geride bırakmayan kamera.
+Web Audio, kullanıcı tıklamasından önce açılmadı. Tıklamadan sonra AudioContext çalıştı; analizör RMS çıkışı sıfırdan farklıydı. Gazla RPM ve rüzgâr parametreleri arttı; ses seviyesi sıfırken RMS <0.0001 oldu. Bu, sinyal/işlev doğrulamasıdır; kayıt stüdyosu düzeyinde öznel ses değerlendirmesi yapıldığı iddia edilmez.
 
-21 kontrol; açılış, dururken hareketsizlik, gaz/HUD, sonsuz parça döngüsü/rebase, FOV, kamera mesafesi, direksiyon, yol dışı tutuş, fren, R kurtarması, kask/geniş kameralar, duraklatma, devam etme, odak kaybı, yeniden başlatma, başlangıca dönme, mobil düğmeler, dokunmatik gaz, eşzamanlı gaz/direksiyon ve konsol/istek hatalarını kapsar.
+## Uzun sürüş ve performans
 
-390×844 dokunmatik emülasyonda gerçek CDP touch olaylarıyla gaz ve direksiyon birlikte denendi. Portre kadrajı ve HUD konumları ekran görüntülerinde incelendi. Bu test gerçek bir telefonun GPU/ısı/pil veya Safari davranışını doğrulamaz.
+Son kaynak üzerinde **24 dakikalık hızlandırılmış tam oyun testi geçti**. En yoğun trafikte yaklaşık **16.39 km** simülasyon sürüşü ve ardından zamanlama aralığıyla toplam **16.46 km** ilerleme gerçekleşti. Her 120 simüle saniyede trafik ilerlemeye devam etti; hata/kaza olmadı. **12 dünya parçası**, **56 araçlık havuz**, son durumda **137 GPU geometrisi / 5 doku** vardı. Geometri sayısı ilk kez görülen kaynaklar GPU'ya yüklendikten sonra sabit kaldı.
 
-İlk headless çalıştırma SwiftShader yazılımsal çizimi seçti ve düşük FPS verdi. GPU arka ucu açıkça seçildiğinde son ölçüm 60 FPS oldu. Düşük güçlü donanımlar için genel bir 60 FPS garantisi verilmez.
+Isınma sonrası GC ile ölçülen JS heap yaklaşık **6.97–8.61 MiB** aralığındaydı; max–min farkı **1.64 MiB**. Kontrolsüz bir büyüme gözlenmedi; bu, saatlerce bellek sızıntısı bulunmadığına ilişkin kesin bir garanti değildir.
 
-Ham sonuçlar: [browser-results.json](artifacts/browser-results.json), [pages-results.json](artifacts/pages-results.json).
+Hızlandırılmış testte JavaScript fizik döngüsü grafik karelerini beklemez; o aralıktaki FPS sayacı performans ölçümü olarak kullanılmadı. Ardından uyarlanan çözünürlük sıfırlanarak tam piksel oranı **1** ile ayrı **12.009 s** gerçek `requestAnimationFrame` ölçümü yapıldı: **718 kare / 59.79 FPS**, p95 **16.8 ms**. Donanım RTX 5060 / D3D11 / 1440×900, yüksek kaliteydi. Bu çalışma 24 dakikalık hızlandırılmış simülasyondur; saatlerce gerçek zamanlı oynanış olarak sunulmaz.
 
-## Görsel kontrol ve düzeltilenler
+## Temizleme ve bulunan hatalar
 
-[Başlangıç](artifacts/01-intro.png), [sürüş](artifacts/02-riding.png), [kask](artifacts/03-helmet.png), [geniş takip](artifacts/04-wide.png), [mobil](artifacts/05-mobile.png) görüntüleri incelendi.
+Dispose sonrasında renderer sayacı **0 geometri / 0 doku** gösterdi. Kaldırılmış klavye ve başlangıç düğmesi dinleyicileri artık oyunu etkilemedi; debug erişimi kaldırıldı. Restart yeni dünyalar/AudioContext'ler biriktirmez; mevcut sistemler sıfırlanır.
 
-- Yüksek hızda kamera gecikmesinin motosikleti fazla küçültmesi giderildi; regresyon testi eklendi.
-- Kask kamerası, kafa geometrisi gösterilmeden aynalar/kokpit görünecek şekilde düzenlendi.
-- Fairing yüzlerinin yönü ve gaz/fren yük aktarımı düzeltildi.
-- Statik motosiklet parçaları materyale göre birleştirilerek çizim çağrıları azaltıldı.
-- Şerit çizgisi buffer boyutu sabitlendi, yol dokusunun parça sınırındaki fazı eşlendi.
-- Portre görünümünde kamera uzaklığı ve hız göstergesi düzeltilerek motor/dokunmatik düğme çakışması azaltıldı.
-- Vite 8'in `manualChunks` fonksiyon imzasına uyum sağlandı.
+Kalite kontrolünde düzeltilen önemli sorunlar:
 
-## Henüz doğrulanmayanlar
+- Yüksek hızda takip kamerasının geride kalması; portrede motosiklet/HUD çakışması.
+- Kaskta kokpitin görünmemesi, fairing yüz yönleri ve ters yük aktarımı.
+- Sabit olmayan şerit çizgisi buffer boyutu ve parça sınırında doku fazı.
+- En yoğun trafikte dönüş alanı olmadan başlayan sollamalar ve sırasız kuyruk ayırması.
+- Yarış AI'sında şerit hedefinin her karede değişmesi ve rakiplerin bitişte durması.
+- Durağan oyuncuya gelen aracın çarpışmasının atlanması.
+- Yatay mobil menü taşması ve ayar kapatma düğmesinin başlık altında kalması.
 
-- Gerçek mobil donanım, Firefox ve Safari.
-- Saatler süren kesintisiz gerçek oyun / GPU bellek profili.
-- GitHub hesabına gerçek Pages dağıtımı. Yerel üretim alt-yol testi geçti; workflow hazır.
-- Trafik, çarpışma, yarış, ses, biyom ve gece; bu aşamada uygulanmadıkları için test edilmiş gösterilmez.
+## Sınırlar
 
-Windows'ta mevcut Chrome penceresine yapılan computer-use bağlantısı adresi güvenilir biçimde belirleyemediği için araç bu oturumda durdu; o pencereye daha fazla girdi gönderilmedi. Tarayıcı doğrulaması ayrı Playwright/Chromium test sürecinde tamamlandı.
+Gerçek telefon GPU/ısı/pil koşulları, Safari/Firefox ve saatlerce duvar saati sürüşü test edilmedi. GitHub Pages'e gerçek hesap üzerinden yayın yapılmadı; yerel üretim alt yol testi geçti ve Actions workflow'u hazırdır. İlk Windows headless denemesinde SwiftShader düşük FPS verdi; donanım D3D11 seçilerek ölçüm yapıldı. Her donanım için 60 FPS garantisi verilmez. Fizik arcade ve görseller stilizedir; tam rijit cisim/ragdoll veya fotogerçekçilik doğrulaması iddia edilmez.
+
+Ham kayıtlar: `browser-results.json`, `world-results.json`, `traffic-results.json`, `modes-results.json`, `polish-results.json`, `audit-results.json`, `pages-results.json`, `soak-results.json`.

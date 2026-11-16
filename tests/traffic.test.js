@@ -49,6 +49,11 @@ test('following AI brakes for stationary leader and rejects unsafe oncoming over
   assert.ok(accelerationFor(car, leader, path) < -5);
   assert.equal(canOvertake(car, leader, [car, leader, oncoming], { active: false }), false);
   assert.equal(canOvertake(car, leader, [car, leader], { active: false }), true);
+  assert.equal(
+    canOvertake(car, leader, [car, leader, actor(4, 55, 14)], { active: false }),
+    false,
+    'do not enter the opposing lane without a re-entry gap beyond a convoy',
+  );
 });
 
 test('AI performs a complete safe overtake and returns to its own lane', () => {

@@ -235,3 +235,23 @@ test('50 km of chunk recycling plus a 10,000 km rebase keeps resources bounded',
   world.dispose();
   assert.equal(scene.children.length, 0);
 });
+
+test('downward raycasts hit the visible asphalt exactly at the physics contact height', () => {
+  for (const biome of ['forest', 'coastal', 'mountain', 'highland']) {
+    const path = new RoadPath(7049, biome),
+      world = new WorldManager(new THREE.Scene(), path),
+      ray = new THREE.Raycaster(),
+      down = new THREE.Vector3(0, -1, 0);
+    for (const s of [24.3, 127.9, 128.1, 511.4, 1080.2, 3100.7, 9999.3]) {
+      world.update(s);
+      world.scene.updateMatrixWorld(true);
+      const p = path.surface(s, 2.3),
+        local = world.toLocal(p, new THREE.Vector3());
+      ray.set(local.clone().add(new THREE.Vector3(0, 2, 0)), down);
+      const hits = ray.intersectObjects(world.chunks.map((c) => c.road.getObjectByName('asphalt')));
+      assert.ok(hits.length > 0);
+      close(hits[0].point.y, local.y + 0.025, 0.0001);
+    }
+    world.dispose();
+  }
+});

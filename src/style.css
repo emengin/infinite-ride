@@ -7,6 +7,135 @@
   --lime: #d9fa65;
   --muted: #a5ada7;
 }
+@media (pointer: coarse) {
+  body .keyboard-help {
+    display: none;
+  }
+}
+@media (max-height: 550px) and (min-width: 600px) {
+  body .hud .speedometer {
+    width: 115px;
+    right: 24px;
+    top: 85px;
+    bottom: auto;
+  }
+  body .hud .speed-value {
+    font-size: 64px;
+    letter-spacing: -4px;
+  }
+  body .hud .journey {
+    top: 97px;
+    right: 165px;
+  }
+  body .hud .journey strong {
+    font-size: 18px;
+    margin-top: 6px;
+  }
+  body .hud .route-label {
+    top: 90px;
+    left: 32px;
+    gap: 8px;
+  }
+  body .hud .route-label strong {
+    font-size: 18px;
+  }
+  body .hud .race-panel,
+  body .hud .score-panel {
+    top: 95px;
+    left: 220px;
+  }
+  body .hud .race-panel strong {
+    font-size: 25px;
+    margin: 8px 0;
+  }
+  body .hud .race-panel > span:not(.small-label) {
+    font-size: 14px;
+  }
+  body .hud .nitro-meter {
+    margin-top: 9px;
+  }
+  #touch-controls .touch-camera {
+    left: 190px;
+    bottom: 78px;
+  }
+  body #touch-controls .touch-nitro {
+    right: 180px;
+    bottom: 164px;
+  }
+}
+@media (max-height: 550px) and (min-width: 600px) {
+  .intro .intro-content {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 8px 45px;
+    width: 86%;
+    margin: 65px 7% 25px;
+  }
+  .intro-content > .eyebrow {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-size: 8px;
+  }
+  .intro-content > h1 {
+    grid-column: 1;
+    grid-row: 2 / 5;
+    font-size: 58px !important;
+    align-self: center;
+  }
+  .intro-content > .tagline {
+    grid-column: 1;
+    grid-row: 5;
+    margin: 0;
+    font-size: 14px;
+  }
+  .intro-content > .mode-choices {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  .intro-content > .biome-choice {
+    grid-column: 2;
+    margin: 0;
+    font-size: 8px;
+  }
+  .intro-content > .biome-choice:first-of-type {
+    grid-row: 2;
+  }
+  .intro-content > .biome-choice:last-of-type {
+    grid-row: 3;
+  }
+  .intro-content > .primary {
+    grid-column: 2;
+    grid-row: 4;
+    min-width: 0;
+    width: 100%;
+    padding: 14px 18px;
+  }
+  .intro-content > .menu-links {
+    grid-column: 2;
+    grid-row: 5;
+    margin: 0;
+  }
+  .intro-content > .intro-meta,
+  .intro-content > .intro-copy {
+    display: none;
+  }
+  .intro-content select {
+    padding: 8px 10px;
+  }
+  .intro-content .mode-choices button {
+    padding: 10px;
+    font-size: 8px;
+  }
+  .panel {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .intro .intro-bottom {
+    bottom: 13px;
+  }
+}
 .menu-links {
   display: flex;
   gap: 12px;
@@ -64,7 +193,7 @@
   );
   mask-image: radial-gradient(ellipse, transparent 42%, #000 100%);
 }
-.settings-overlay {
+.overlay.settings-overlay {
   z-index: 8;
 }
 .settings-panel {
@@ -156,7 +285,7 @@
 .vignette {
   background: linear-gradient(180deg, #111b204a, transparent 28%, transparent 65%, #111b2052);
 }
-.crash-overlay {
+.overlay.crash-overlay {
   backdrop-filter: blur(3px);
   background: #27181677;
 }

@@ -10,6 +10,61 @@ const radius = (box, axis) => {
   );
 };
 
+export function roadBox(path, box) {
+  const p = path.surface(box.s, box.d),
+    previous = path.surface(box.prevS ?? box.s, box.prevD ?? box.d);
+  return {
+    ...box,
+    s: -p.z,
+    d: p.x,
+    prevS: -previous.z,
+    prevD: previous.x,
+    headingError: path.frame(box.s).heading + (box.headingError || 0),
+  };
+}
+export function distanceBoxes(a, b) {
+  if (sweepBoxes({ ...a, prevS: a.s, prevD: a.d }, { ...b, prevS: b.s, prevD: b.d }) !== null)
+    return -1;
+  const corners = (box) => {
+    const basis = axes(box.headingError || 0);
+    return [
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ].map(([x, y]) => [
+      box.s + basis[0][0] * x * box.halfLength + basis[1][0] * y * box.halfWidth,
+      box.d + basis[0][1] * x * box.halfLength + basis[1][1] * y * box.halfWidth,
+    ]);
+  };
+  const ac = corners(a),
+    bc = corners(b);
+  let best = Infinity;
+  for (const [points, edges] of [
+    [ac, bc],
+    [bc, ac],
+  ])
+    for (const point of points)
+      for (let i = 0; i < 4; i++) {
+        const start = edges[i],
+          end = edges[(i + 1) % 4],
+          dx = end[0] - start[0],
+          dy = end[1] - start[1],
+          t = Math.max(
+            0,
+            Math.min(
+              1,
+              ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy),
+            ),
+          );
+        best = Math.min(
+          best,
+          Math.hypot(point[0] - start[0] - dx * t, point[1] - start[1] - dy * t),
+        );
+      }
+  return best;
+}
+
 // Swept SAT for oriented boxes in the longitudinal/lateral road frame.
 export function sweepBoxes(a, b) {
   let enter = 0,
@@ -39,9 +94,11 @@ export function sweepBoxes(a, b) {
 export class CollisionSystem {
   check(player, traffic, world) {
     const box = { ...player, halfWidth: 0.34, halfLength: 1.05 };
+    const contactBox = world ? roadBox(world.path, box) : box;
     for (const actor of traffic) {
+      if (actor.active === false) continue;
       if (Math.abs(player.s - actor.s) > 35 + player.speed / 120 + actor.speed / 120) continue;
-      if (sweepBoxes(box, actor) !== null)
+      if (sweepBoxes(contactBox, world ? roadBox(world.path, actor) : actor) !== null)
         return {
           kind: 'vehicle',
           actor: actor.id,
@@ -51,7 +108,11 @@ export class CollisionSystem {
     if (world) {
       const frame = world.path.frame(player.s),
         b = world.path.biomes.sample(player.s);
-      const barrier = b.mountain > 0.35 || b.coast > 0.35 || Math.abs(frame.curvature) > 0.0016;
+      const barrier =
+        b.mountain > 0.35 ||
+        b.coast > 0.35 ||
+        Math.abs(frame.curvature) > 0.0016 ||
+        world.path.structure(player.s).type;
       if (barrier && Math.abs(player.d) > 0.55 + 4.6 && Math.abs(player.d) < 7)
         return { kind: 'barrier', severity: Math.min(1, player.speed / 50) };
       for (const chunk of world.chunks) {

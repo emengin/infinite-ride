@@ -345,7 +345,10 @@ export class Game {
       this.physics.state,
       pose,
       this.world,
-      atmosphere.night,
+      Math.max(
+        atmosphere.night,
+        this.path.structure(this.physics.state.s).type === 'tunnel' ? 1 : 0,
+      ),
       this.traffic.simulation.actors,
       this.settings.quality,
     );
@@ -389,6 +392,7 @@ export class Game {
   snapshot() {
     return {
       mode: this.mode,
+      lastCrash: this.lastCrash || null,
       settings: { ...this.settings },
       audio: this.audio.snapshot(),
       atmosphere: {

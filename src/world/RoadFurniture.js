@@ -48,7 +48,12 @@ export class RoadFurniture {
         b = this.path.biomes.sample(s),
         f = this.path.frame(s);
       for (const side of [-1, 1]) {
-        if (b.mountain > 0.35 || b.coast > 0.35 || Math.abs(f.curvature) > 0.0016) {
+        if (
+          b.mountain > 0.35 ||
+          b.coast > 0.35 ||
+          Math.abs(f.curvature) > 0.0016 ||
+          this.path.structure(s).type
+        ) {
           place('rails', s + 4, side * 5.55, 0.78, [0.1, 0.2, 8.15]);
           place('posts', s, side * 5.55, 0.4, [0.12, 0.8, 0.12]);
         }

@@ -1,4 +1,4 @@
-import { lerp, noise, clamp } from '../core/math.js';
+import { lerp, noise, clamp, smooth } from '../core/math.js';
 import { BiomeManager } from './BiomeManager.js';
 
 export const ROAD = Object.freeze({
@@ -81,7 +81,30 @@ export class RoadPath {
       d > 0
         ? lerp(roadY, -12, Math.min(1, (distance - ROAD.shoulder) / 38))
         : roadY + blend * (hills + distance * 0.12);
-    return lerp(land, coast, biome.coast);
+    let height = lerp(land, coast, biome.coast);
+    const structure = this.structure(s),
+      edge = smooth(clamp((distance - ROAD.shoulder) / 5, 0, 1));
+    if (structure.type === 'bridge')
+      height -= structure.blend * edge * 30 * Math.exp(-distance / 250);
+    if (structure.type === 'tunnel') height += structure.blend * edge * 24;
+    return height;
+  }
+
+  structure(s) {
+    const cell = ((Math.floor(s / 128) % 32) + 32) % 32,
+      local = ((s % 128) + 128) % 128;
+    if (cell === 8)
+      return {
+        type: 'bridge',
+        blend: smooth(clamp(local / 28, 0, 1)) * smooth(clamp((128 - local) / 28, 0, 1)),
+      };
+    if ((cell === 24 || cell === 25) && this.biomes.sample(s).mountain > 0.55)
+      return {
+        type: 'tunnel',
+        blend:
+          cell === 24 ? smooth(clamp(local / 28, 0, 1)) : smooth(clamp((128 - local) / 28, 0, 1)),
+      };
+    return { type: null, blend: 0 };
   }
 
   vertex(s, d) {

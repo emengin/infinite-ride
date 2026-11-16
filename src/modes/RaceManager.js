@@ -32,6 +32,8 @@ export class RaceManager {
         active: true,
         physics,
         finishTime: null,
+        targetLane: personality.lane,
+        passLeaderId: null,
       };
     });
   }
@@ -41,7 +43,7 @@ export class RaceManager {
       id: r.id,
       type: 6,
       dir: 1,
-      active: true,
+      active: r.physics.state.s < this.start + this.length + 200,
       halfWidth: r.halfWidth,
       halfLength: r.halfLength,
       finishTime: r.finishTime,
@@ -60,40 +62,74 @@ export class RaceManager {
       { ...player, halfWidth: 0.36, halfLength: 1.08, id: 'player', dir: 1 },
     ];
     for (const rival of this.rivals) {
-      if (rival.finishTime !== null) continue;
+      if (rival.finishTime !== null) {
+        const st = rival.physics.state;
+        st.prevS = st.s;
+        st.prevD = st.d;
+        st.s += (st.speed * dt) / this.path.frame(st.s).metric;
+        continue;
+      }
       const st = rival.physics.state;
       const curve = Math.max(
         Math.abs(this.path.frame(st.s + 25).curvature),
         Math.abs(this.path.frame(st.s + 55).curvature),
       );
       let target = Math.min(rival.pace, Math.sqrt(7.2 / Math.max(0.0001, curve))),
-        lane = rival.lane;
+        lane = rival.targetLane;
+      const clearCorridor = (destination) =>
+        participants.every((a) => {
+          if (a.id === rival.id || a.active === false) return true;
+          const ds = a.s - st.s;
+          if (ds < -18 || ds > (a.dir < 0 ? 260 : 45)) return true;
+          const min = Math.min(st.d, destination) - a.halfWidth - 0.6,
+            max = Math.max(st.d, destination) + a.halfWidth + 0.6;
+          return a.d < min || a.d > max;
+        });
+      if (rival.passLeaderId !== null) {
+        const passed = participants.find((a) => a.id === rival.passLeaderId);
+        const incoming = participants.some(
+          (a) => a.dir < 0 && a.s > st.s && a.s - st.s < 240 && Math.abs(a.d - lane) < 2,
+        );
+        if (
+          (!passed || st.s > passed.s + passed.halfLength + 20 || incoming) &&
+          clearCorridor(rival.lane)
+        ) {
+          lane = rival.lane;
+          rival.passLeaderId = null;
+        }
+      }
       const leader = participants
         .filter(
           (a) =>
             a.id !== rival.id &&
             a.s > st.s &&
             a.s - st.s < 75 &&
-            Math.abs(a.d - st.d) < a.halfWidth + 0.85,
+            Math.abs(a.d - st.d) < a.halfWidth + 0.56,
         )
         .sort((a, b) => a.s - b.s)[0];
-      if (leader) {
+      if (
+        leader &&
+        rival.passLeaderId === null &&
+        leader.dir === 1 &&
+        leader.s - st.s > 35 &&
+        leader.speed < target - 2
+      ) {
         const choices = [rival.lane, 1.0, 2.6, 3.8, -2.3];
-        const open = choices.find((d) =>
-          participants.every(
-            (a) =>
-              a.id === rival.id ||
-              Math.abs(a.d - d) > a.halfWidth + 0.65 ||
-              Math.abs(a.s - st.s) > (a.dir < 0 ? 180 : 30),
+        const open = choices.find((d) => Math.abs(d - st.d) > 0.8 && clearCorridor(d));
+        if (open !== undefined) {
+          lane = open;
+          rival.passLeaderId = leader.id;
+        }
+      }
+      rival.targetLane = lane;
+      if (leader)
+        target = Math.min(
+          target,
+          Math.max(
+            0,
+            leader.speed * (leader.dir ?? 1) + (leader.s - st.s - leader.halfLength - 12) * 0.55,
           ),
         );
-        if (open !== undefined) lane = open;
-        if (Math.abs(lane - st.d) < 0.6 || leader.s - st.s < 13)
-          target = Math.min(
-            target,
-            Math.max(0, leader.speed * (leader.dir ?? 1) + (leader.s - st.s - 10) * 0.6),
-          );
-      }
       const steer = clamp((lane - st.d) * 0.7, -1, 1),
         throttle = clamp(0.4 + (target - st.speed) * 0.35, 0, 1),
         brake = clamp((st.speed - target) / 6, 0, 1);
@@ -102,7 +138,6 @@ export class RaceManager {
       rival.physics.update(dt, { throttle, brake, steer });
       if (st.s >= this.start + this.length) {
         rival.finishTime = this.time;
-        st.speed = 0;
       }
     }
     const progress = player.s - this.start;

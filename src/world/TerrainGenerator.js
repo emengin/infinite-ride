@@ -124,6 +124,12 @@ export class TerrainGenerator {
         s = start + hash(id, this.path.seed) * 128,
         b = this.path.biomes.sample(s);
       if (hash(id + 9, this.path.seed) > b.trees * 0.91 + 0.02) continue;
+      if (
+        this.path.structure(s).type === 'tunnel' ||
+        this.path.structure(s - 12).type === 'tunnel' ||
+        this.path.structure(s + 12).type === 'tunnel'
+      )
+        continue;
       const d = (i % 2 ? -1 : 1) * (8.5 + hash(id + 1, this.path.seed) * 125);
       if (d > 0 && b.coast > 0.5) continue;
       const p = this.path.surface(s, d),
@@ -161,6 +167,7 @@ export class TerrainGenerator {
             ? 150 + hash(id + 1, this.path.seed) * 260
             : 7.9 + hash(id + 1, this.path.seed) * 90);
       if (d > 0 && b.coast > 0.6) continue;
+      if (Math.abs(d) < 40 && this.path.structure(s).type === 'tunnel') continue;
       const scale =
         (distant
           ? 12 + hash(id + 2, this.path.seed) * 33
@@ -189,6 +196,7 @@ export class TerrainGenerator {
         d = (i % 2 ? -1 : 1) * (6.5 + hash(id + 1, this.path.seed) * 32),
         b = this.path.biomes.sample(s);
       if (d > 0 && b.coast > 0.5) continue;
+      if (this.path.structure(s).type === 'tunnel') continue;
       const p = this.path.surface(s, d),
         scale = 0.2 + hash(id + 2, this.path.seed) * 0.5;
       if (i < 128)

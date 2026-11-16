@@ -54,3 +54,14 @@ test('changing biome retains pooled objects and bounds every instance count', ()
   }
   world.dispose();
 });
+
+test('bridge and tunnel road contacts remain continuous and tunnels keep camera clearance', () => {
+  const p = new RoadPath(7049, 'mountain');
+  assert.equal(p.structure(1080).type, 'bridge');
+  assert.equal(p.structure(3100).type, 'tunnel');
+  for (const s of [1024, 1056, 1152, 3072, 3100, 3200, 3300, 3328])
+    for (const d of [-4.3, 0, 2.3, 4.3])
+      assert.ok(Math.abs(p.surface(s, d).y - p.roadPoint(s, d).y) < 1e-8);
+  assert.ok(p.terrainHeight(1080, 14, p.center(1080).y) < p.center(1080).y - 10);
+  assert.ok(p.terrainHeight(3100, 14, p.center(3100).y) > p.center(3100).y + 10);
+});

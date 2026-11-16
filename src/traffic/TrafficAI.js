@@ -20,12 +20,30 @@ export function accelerationFor(vehicle, leader, path) {
 }
 
 export function canOvertake(vehicle, leader, actors, player) {
-  if (!leader || leader.speed > vehicle.cruise - 4 || vehicle.dir < 0 || vehicle.cooldown > 0)
+  if (
+    !leader ||
+    leader.dir !== vehicle.dir ||
+    vehicle.speed < 8 ||
+    leader.speed > vehicle.cruise - 4 ||
+    vehicle.dir < 0 ||
+    vehicle.cooldown > 0
+  )
     return false;
   const target = -vehicle.dir * 2.3;
   return [...actors, player].every((other) => {
     if (!other.active || other === vehicle || other === leader) return true;
     const ds = (other.s - vehicle.s) * vehicle.dir;
+    // Reserve a real re-entry gap beyond the slower vehicle. Do not start
+    // overtaking a convoy whose next car blocks the return to the home lane.
+    if (
+      other.dir === vehicle.dir &&
+      Math.abs(other.d - vehicle.dir * 2.3) < 2.2 &&
+      ds > 0 &&
+      ds < (leader.s - vehicle.s) * vehicle.dir + 95
+    )
+      return false;
+    if (other.passing !== null && other.passing !== undefined && ds > -120 && ds < 300)
+      return false;
     if (other.dir !== vehicle.dir && ds > -50 && ds < (vehicle.speed + other.speed) * 10 + 60)
       return false;
     return !(Math.abs(other.d - target) < 2.4 && ds > -45 && ds < 130);

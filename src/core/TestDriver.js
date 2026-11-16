@@ -4,6 +4,24 @@ import { VEHICLES } from '../traffic/TrafficSimulation.js';
 // exercise the same game systems as keyboard input; never used by normal play.
 export function createTestDriver(game) {
   return Object.freeze({
+    resetPerformance() {
+      game.performance.apply(game.settings);
+      game.lastTime = 0;
+      game.fps = 60;
+    },
+    disposeCheck() {
+      game.dispose();
+      game.physics.state.s = 987;
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyW', bubbles: true }));
+      document.getElementById('start-button').click();
+      return {
+        keys: game.input.keys.size,
+        position: game.physics.state.s,
+        debugRemoved: !window.__ride,
+        geometries: game.renderer.webgl.info.memory.geometries,
+        textures: game.renderer.webgl.info.memory.textures,
+      };
+    },
     player(values) {
       game.physics.reset(values.s ?? 24);
       Object.assign(game.physics.state, values);

@@ -1,70 +1,62 @@
 # INFINITE RIDE — Proje Durumu
 
-Son güncelleme: **16 Kasım 2026**. **Aşama 1–4 tamamlandı. Aşama 5 işlevsel ve regresyonları geçti; Aşama 6 son kalite kontrolü sırada.**
+**16 Kasım 2026 · v1.0.0 · Aşama 1–6 uygulandı ve belirtilen test kapsamı içinde doğrulandı.**
 
-## Çalışma kuralı
+## Yetki ve çalışma düzeni
 
-Kullanıcı 16 Kasım 2026 tarihli yeni talimatıyla Aşama 2–6 için önceden devam onayı verdi. Her aşama aynı dosyalarda ilerler; kritik testler geçmeden sonraki aşamaya geçilmez. Çalışan mekanikler korunur, uygulama çalıştırılır, mümkün testler yapılır, bu dosya güncellenir ve her kararlı aşama yerel commit ile kaydedilir. Harici yayınlama bu yetkinin kapsamında değildir.
+Kullanıcı ikinci talimatında Aşama 2–6 için önceden devam onayı verdi. Aşamalar aynı dosyalarda sırayla uygulandı; her kararlı aşama commit edildi. Kritik test sorunu bulunduğunda düzeltildi ve tekrar test edildi. Harici hesaba push, hesap bağlantısı veya canlı yayın yapılmadı. Kullanıcıya yeniden aşama onayı sorulmaz. Özgün uzun vadeli gereksinimler `docs/PROJECT_BRIEF.md` içindedir.
 
-Özgün uzun vadeli ürün tanımı `docs/PROJECT_BRIEF.md` içinde korunmuştur. Bu belgedeki tüm oyun hedefleri birden uygulanmaz; kullanıcının aşama sınırlaması ve bu durum dosyası esas alınır.
+## Tamamlanan aşamalar
 
-## Tamamlanan kapsam
+| Aşama | Gerçek sonuç                                                                                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1     | 120 Hz fizik, kontrol edilebilir özgün motosiklet, üç kamera, seed tabanlı sonsuz yol, temel arazi/HUD                                                                                           |
+| 2     | Forest/Highland/Mountain/Coastal, 450 m geçişler, yoğun instanced çevre, deniz/zirveler, bariyer/reflektör/uyarı levhaları, materyal ve atmosfer                                                 |
+| 3     | Yedi araç türü, iki yönlü trafik, dört yoğunluk + kapalı, 56 nesnelik havuz, takip/fren/sollama/dönüş, çarpışma ve yakın geçiş                                                                   |
+| 4     | Free Ride, Traffic Rush puan/combo/rekor, üç AI ile 3 km yarış, geri sayım, üç kontrol noktası, bitiş/sıralama/süre/sonuç                                                                        |
+| 5     | Dinamik Web Audio, nitro, canlı kokpit, dört saat ve dinamik döngü, far havuzu, gerçek/saklanan ayarlar, mobil ve görsel polish                                                                  |
+| 6     | Kapsamlı regresyon, gerçek mesh raycast'i, AI/yoğun trafik düzeltmeleri, köprü/tünel eksiklerinin kapatılması, GPU/listener temizliği ve mobil yatay düzeltmesi; son uzun test/paket doğrulaması |
 
-- Three.js/WebGL 2 sahnesi; temel ışık, gölge, sis ve gökyüzü.
-- Kontrol edilebilir spor motosikleti; gaz, fren, direksiyon, viraja yatış, eğim ve yol dışı tutuş.
-- 120 Hz fizik, FPS bağımsız girdi/hareket, odak kaybında güvenli duraklatma.
-- Üç kamera; hızla FOV, kokpit görünümü, yol dışı titreşimi, yeniden konumlandırmada kararlı takip.
-- Gerçekten devam eden seed tabanlı inişli çıkışlı yol ve temel arazi.
-- 12 parça havuzu, 128 m parçalar, 4 m örnekleme, 512 m floating origin.
-- KM/H, mesafe, yüzey ve kamera HUD'u; başlangıç/duraklatma; klavye ve çoklu dokunmatik girdi.
-- Vite üretim derlemesi; Pages workflow'u; README, otomatik testler ve ZIP teslimi.
+## Mimari
 
-## Mimari ve kararlar
+ES Modules + Three.js 0.187 + Vite 8.3.8. Three.js tek çalışma bağımlılığıdır; Playwright test aracıdır. Backend, UI framework veya harici fizik motoru yoktur.
 
-Tek çalışma bağımlılığı Three.js; Vite ve Playwright geliştirme araçları. ES Modules. UI framework veya fizik motoru yok; mevcut sürüş gereksinimi için ayrı saf JavaScript fizik modülü daha küçük ve test edilebilir.
+- **Game:** intro/countdown/running/paused/crashed/results yaşam döngüsü. Sabit 1/120 s fizik, ayrı render/kamera/UI. Odak kaybında güvenli duraklatma. Ses yalnızca kullanıcı etkileşiminden sonra açılır.
+- **RoadPath:** seed, yol merkezi/çerçevesi/eğimi/eğriliği ve tek yüzey kaynağı. `s/d` metre cinsindedir. Render ve fizik 4 m kesitleri ve üçgen köşegenlerini paylaşır. Aşağı raycast'ler gerçek asfalt mesh'inde aynı teması doğrular.
+- **WorldManager:** 12 × 128 m parça. 512 m floating origin. Mevcut grup/geometri/buffer'lar yeniden doldurulur; GPU'ya büyük mutlak koordinatlar gönderilmez.
+- **BiomeManager:** varsayılan seed 7049, yaklaşık 1.8 km bölümler, 450 m yumuşak geçiş. Dört biyom, manuel seçim veya keşif. Yol x-z koridoru boyunca sonsuz ilerler; dallanan açık dünya değildir.
+- **Terrain/Road/Furniture/Structures:** shared materyal/geometri ve InstancedMesh. Deniz, dağ kütleleri, bitkiler, yol detayları, 128 m köprüler ve dağda 256 m tüneller aynı yol çerçevesini izler. Tünelde far açılır.
+- **MotorcyclePhysics/Model:** saf arcade fizik; sürüş yönü/yatma ayrı; eğim, direnç, fren, düşük toprak tutuşu, hızla kontrollü yön tepkisi ve nitro. Model tekerlek/gidon/yük aktarımı/fren lambası ve gerçek hızı gösteren kokpit içerir.
+- **TrafficSimulation/AI/Manager:** saf simülasyon + ayrı instanced çizim. 56 aktör havuzu; düşük/orta/yüksek/aşırı 12/24/38/56 hedef. Uygun boşluk yoksa spawn ertelenir. Takip AI'sı, eğri hız sınırı, güvenli karşı şerit ve dönüş alanı rezervasyonu. Kuyruk ayırma önden arkaya çözülür.
+- **CollisionSystem:** görünür araç boyutlarından türeyen yönlü kutular; dünya x-z düzleminde süpürülmüş SAT. Yakın geçiş mesafesi kutu köşeleri/kenarları arasından hesaplanır. Yol kenarı engelleri de algılanır.
+- **Session/Race/Save:** mod puanı/combo ve rekor. Rakipler aynı fizik/yolu kullanır, şerit planını bitirene kadar korur ve trafik/diğer yarışçılara tepki verir. Bitişten sonra yolu boşaltırlar. Bozuk/kapalı depolama oyunu durdurmaz.
+- **Time/Renderer/Audio/Performance:** dört saat + 12 dakika dinamik döngü; değişen gökyüzü/güneş/gölge/sis; motosiklet farı + en fazla dört yakın araç farı. Dört kalıcı ses kaynağı ve en fazla sekiz eşzamanlı efekt. Grafik kalitesi ve uyarlanan piksel oranı.
+- **Input/UI:** klavye ve çoklu dokunma; üç mod, pause, yardım, ayarlar ve sonuçlar. Dinleyiciler AbortController ile; GPU/ses kaynakları modül sahipleri tarafından temizlenir.
 
-`Game` sistemleri birleştirir. `RoadPath` rota ve yüzeyin tek kaynağıdır. `RoadGenerator` ve `TerrainGenerator` aynı örnek ve köşegenleri kullanır. `MotorcyclePhysics` s/d yol koordinatında hareket eder, görünür mesh ile aynı üçgen yüzeyi örnekler. Viraj yardımı yolun açısal hızını izler; oyuncu yön hatasına kumanda eder, tutuş açısal hızı sınırlar. Görsel yatış, fiziksel heading'den ayrıdır. Normal hızlarda rahat yolculuk, yüksek hızda fren gerektiren virajlar hedeflenir.
+## Son doğrulama
 
-`WorldManager` parça nesnelerini ve geometri buffer'larını yeniden doldurur. Seed deterministiktir, varsayılan 7049; `?seed=metin` ile değişir. Dünya koordinatları CPU'da double, GPU'da parça/origin çevresinde küçüktür. Mevcut yol işlevi uzunlamasına ilerleyen kıvrımlı bir güzergâhtır; serbest açık dünya veya dallanan yol ağı değildir.
+31 Node testi ve tam `npm run test:e2e` paketi geçti: 21 sürüş kontrolü, 4 biyom render'i, 6 trafik, 6 mod, 8 polish, 3 yaşam döngüsü/mobil kontrolü ve Pages alt yol testi. Kaza sonrası dönüş, durağan oyuncuya çarpma, gerçek 3 km yarış bitişi, skorun reload sonrası saklanması ve ses çıkışının sıfırlanması denendi. GPU kaynak sayıları dispose sonunda sıfıra indi; klavye/UI dinleyicilerinin kaldırıldığı doğrulandı.
 
-Motosiklet özgün geometrik modeldir; statik parçalar materyale göre birleştirilir, tekerlekler/gidon/kask grupları ayrı animasyon alır. Ağaç ve kayalar InstancedMesh'tir. Kamera önce motosikletin ötelemesini devralır, sonra bakış/çerçevelemeyi yumuşatır; böylece hız arttığında geride kalıp motoru küçültmez. Dinleyiciler AbortController ile kaldırılır; geometri/materyal dispose sorumlulukları modüllerdedir.
+Sonuç ayrıntıları ve uzun test ölçümleri `TEST_REPORT.md` ile `artifacts/*-results.json` içindedir. Son uzun test geçti: 24 simüle dakika, yaklaşık 16.46 km, sabit 12 parça/56 araçlık havuz, son 137 GPU geometrisi/5 doku. Isınma sonrası GC heap aralığı farkı 1.64 MiB. Ayrı 12.009 s gerçek zamanlı ölçümde yüksek kalite, DPR 1 ve 1440×900'de 59.79 FPS / p95 16.8 ms (RTX 5060). Saatlerce gerçek sürüş iddia edilmez.
 
-## Doğrulama
+## Son kalite kontrolünde düzeltilenler
 
-Son test sayıları, gerçek donanım/FPS ölçümü, ekran görüntüleri ve sınırlar **TEST_REPORT.md** dosyasındadır. Node testleri uzun mesafe davranışını hızlandırılmış simülasyonla kontrol eder; saatlerce kesintisiz gerçek oynanmış gibi değerlendirilmez.
+- Yoğun trafikte yeterli dönüş alanı olmadan başlayan AI sollamaları: konvoyun ötesindeki gerçek boşluk ve manevra rezervasyonu eklendi.
+- Sırasız araç ayırmanın kuyrukta geriye sıçrama üretmesi: önden arkaya çözüm eklendi.
+- Yarışçıların her karede şerit hedefini değiştirmesi: kalıcı sollama/geri dönüş planı ve süpürülen koridor güvenliği eklendi. Canlı trafik ile yarış AI testinde NPC çakışması kalmadı.
+- Bitiren rakibin çizgide durması kaldırıldı.
+- Durağan oyuncuya gelen aracın çarpışması artık algılanır.
+- Yatay mobil menü taşması ve ayar kapatma düğmesinin başlığın altında kalması düzeltildi.
+- Köprü/tünel yol teması ve tünel farı test edildi; tünel girişlerinde bitki yerleşimi temizlendi.
 
-## Bilinen sınırlar ve eksikler
+## Bilinen sınırlar
 
-- Dünya, temel açık tepeler ortamıdır. Gelişmiş orman/dağ biyomları ve materyal/atmosfer kalitesi Aşama 2 kapsamıdır.
-- Trafik ve fiziksel engel/araç çarpışması yok. Ağaç/kayalar dekor; yol dışı koridoru ±26 m ile sınırlı. R güvenli dönüş sağlar.
-- Ses, nitro, kayıt, skor/combo, yarış ve gün/gece yok; bunlara ait sahte düğmeler yok.
-- Tutuş sınırını aşan virajda yüksek hız dışarı sürükleyebilir; temel arcade davranışıdır. Tam rijit cisim, lastik temas kuvveti veya ragdoll simülasyonu değildir.
-- Gerçek mobil cihaz, Safari/Firefox ve saatler süren fiziksel sürüş henüz denenmedi.
-- GitHub Pages için yapılandırma hazır; dış hesaba yayınlama yapılmadı.
-- Three.js vendor paketi yaklaşık 545 kB minify / 135 kB gzip; Vite'nin 500 kB uyarısı bu motor paketine aittir, build hatası değildir.
+Stilize procedural geometri kullanılır; fotogerçekçi taranmış modeller yoktur. Tam rigid-body/ragdoll yerine arcade sürüş ve kutu çarpışması vardır. Her yönde tek şerit bulunur; çok şeritli otoyol genişlemesi yoktur. Sesler sentezlenmiştir. Gerçek telefon, Safari/Firefox, saatler süren duvar saati sürüşü ve canlı GitHub Pages dağıtımı doğrulanmadı. Üretim build'i Three.js vendor parçası (~546 kB minify / 135 kB gzip) için boyut uyarısı verebilir; bu bir build hatası değildir.
 
-## Sürüm kaydı
+## Git ve teslim
 
-Yerel Git deposu `main` dalında tutulur. Aşama 1 commit mesajı: `feat(core): complete stage 1 playable motorcycle foundation`. Uzak depo eklenmedi ve push/yayın yapılmadı. Teslim arşivi: `release/INFINITE-RIDE-Stage-1.zip`; kaynaklar, `dist/` ve son doğrulama çıktıları bulunur, `node_modules/` ve `.git/` dahil değildir.
+`main` dalı. Aşama commit'leri: `d08333d` çekirdek; `07de38b` dünya; `399e66e` trafik; `45dc104` modlar; `f969dc6` polish. Son Aşama 6 commit mesajı: `fix(qa): harden AI, verify full game and prepare v1.0.0 release`. Uzak depo/push yoktur. Teslim arşivi `release/INFINITE-RIDE-v1.0.0.zip`; kaynaklar, dist, lisans ve güncel doğrulama çıktıları içerir; node_modules/.git içermez. Arşivde commit ve dosya SHA-256 değerlerini taşıyan RELEASE_MANIFEST.json vardır.
 
-## Sıradaki işler — yalnızca onaydan sonra
+## Devam noktası
 
-**Aşama 2 / Dünya kalitesi:** mevcut yolu ve fizik testlerini koruyarak orman/dağ ortamı, biyom sistemi, yol tabelaları, bariyerler, atmosfer, materyal/ışık ve model iyileştirmeleri.
-
-Sonraki aşamalar: 3 trafik/çarpışma/sollama; 4 oyun modları; 5 ses/gün-gece/polish; 6 kapsamlı son test ve teslim. Kullanıcı kapsamı değiştirmedikçe bu sıra korunur.
-
-## Aşama 2 kaydı
-
-Dört biyom, 450 m yumuşak biyom geçişi, biyoma göre rota/zemin parametreleri, kıyı denizi ve kayalıkları, dağ kütleleri, yoğun çam/karma orman, yaylalar, instanced çalı/ot/kaya, bariyer, reflektör ve viraj uyarı levhaları eklendi. Güzergâh başlangıç ekranından veya `?biome=forest|coastal|mountain|highland` ile seçilir. Yol/fizik ortak yüzeyi korunur. 15 Node testi ve dört biyom Chromium render/konsol kontrolü geçti; dört biyomun görüntüleri incelendi. Aşama 1'in 21 tarayıcı kontrolü yeni dünyada da geçti. Parça havuzu 50 km testinde sınırlı kalıyor.
-
-## Aşama 3 kaydı
-
-Sedan, hatchback, SUV, spor otomobil, kamyon, otobüs ve motosiklet için özgün birleşik geometriler; iki yönlü trafik, dört yoğunluk ve kapalı seçeneği; 56 nesnelik sabit havuz; eğriliğe göre hız, güvenli takip, boş karşı şeritte sollama ve dönüş eklendi. Süpürülmüş yönlü kutular ile oyuncu/araç ve yol kenarı çarpışmaları, görünür kaza ve kurtarma, gövde boyutları üzerinden yakın geçiş ve tek seferlik sollama olayları var. 21 Node testi (10 dakikalık hızlandırılmış trafik dahil), 5 trafik Chromium senaryosu geçti. Araç ve kaza görüntüleri incelendi. `?test=1&debug=1` sadece otomatik test düzenlemesi için ayrı sürücü açar; normal oyunda erişilmez. Sonraki: Aşama 4 modlar, skor ve yarış.
-
-## Aşama 4 kaydı
-
-Free Ride, Traffic Rush ve Race menüden seçilip gerçekten oynanır. Rush mesafe/hız/karşı şerit/sollama/yakın geçiş puanları, süreli combo, çarpışmada sonuç ve LocalStorage rekoru içerir. Race 3 saniyelik geri sayım, üç farklı AI sürücü, aynı yol/fizikte 3 km yarış, 750 m kontrol noktaları, üç boyutlu kapı/bitiş, süre, sıralama ve sonuç/yeniden deneme içerir. Yarışçı ve trafik AI birbirini hesaba katar. Serbest sürüş duraklatmadan bitirilip özetlenebilir. Kayıt erişimi kapalı/bozuksa oyun sürer. 4 yeni Node testi, 6 mod tarayıcı senaryosu (1.5 km üzeri serbest sürüş ve 3 km yarışın hızlandırılmış tam bitişi dahil) geçti. Sonraki: Aşama 5 ses, gün/gece, gerçek ayarlar, nitro ve polish.
-
-## Aşama 5 kaydı
-
-Kullanıcı etkileşiminden sonra açılan Web Audio motor/rüzgâr/trafik/fren, yakın geçiş/kaza/menü/kontrol noktası efektleri; ses ayarı ve duraklatmada sürüş sesinin susması eklendi. Sesler özgün sentezdir, harici kayıt kullanılmaz. Gün doğumu/gündüz/gün batımı/gece ve 12 dakikalık yumuşak dinamik döngü; gökyüzü/güneş/gölge/sis renkleri; gerçek motosiklet spot farı ve yakındaki araçlar için dört adet yeniden kullanılan ışık var. Klavye/dokunmatik nitro, gerçek hız desteği, yakıt boşalması/yenilenmesi, gösterge; kamera FOV/ivme/darbe tepkisi; motosiklette canlı dijital kokpit eklendi. Grafik/çözünürlük, kamera, kontrol hassasiyeti, trafik, biyom, saat, hava ve ses ayarları gerçek sistemlere bağlı ve saklanır. Orta/düşük kalite ve uyarlanan çözünürlük desteği var. 28 Node testi, 21 sürüş, 6 mod ve 8 polish Chromium kontrolü geçti. Gece/kask, dört saat ve ayar ekranları incelendi. Son aşamada uzun süre, kaynak temizliği, mobil, alt yol ve paket doğrulanacak.
+Oynanabilir sürüm incelemeye hazırdır. Sonraki geliştirmelerde mevcut regresyonları koru. Gerçek mobil ve farklı tarayıcıların QA'sı, çok şeritli yol ve daha gelişmiş varlık/fizik kalitesi aday ek işlerdir; tamamlanmış gösterilmez. Kullanıcının yeni yönlendirmesiyle aynı kod tabanından devam edilir.

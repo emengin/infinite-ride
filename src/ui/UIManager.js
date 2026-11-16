@@ -180,7 +180,7 @@ export class UIManager {
       String(Math.max(0, Math.min(0.28, (state.speed - 38) / 110))),
     );
     if (!e.debug.hidden)
-      e.debug.textContent = `INFINITE RIDE / AŞAMA 1\n${stats.fps.toFixed(0)} FPS · ${stats.drawCalls} draw calls\n${stats.triangles.toLocaleString()} triangles\n${stats.chunks} chunks · ${stats.geometries} geometries\n${stats.recycled} chunk fills\ns ${state.s.toFixed(1)} m · d ${state.d.toFixed(2)} m\norigin ${stats.origin} m · seed ${stats.seed}\nheading ${state.headingError.toFixed(3)} · lean ${state.lean.toFixed(3)}`;
+      e.debug.textContent = `INFINITE RIDE / 1.0.0\n${stats.fps.toFixed(0)} FPS · ${stats.drawCalls} draw calls\n${stats.triangles.toLocaleString()} triangles\n${stats.chunks} chunks · ${stats.geometries} geometries\n${stats.traffic} traffic / ${stats.trafficPool} pooled\n${stats.recycled} chunk fills · DPR ${stats.pixelRatio.toFixed(2)}\ns ${state.s.toFixed(1)} m · d ${state.d.toFixed(2)} m\norigin ${stats.origin} m · seed ${stats.seed}\nheading ${state.headingError.toFixed(3)} · lean ${state.lean.toFixed(3)}`;
   }
 
   settings(values, visible, locked = false) {

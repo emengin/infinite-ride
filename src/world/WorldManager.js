@@ -3,6 +3,7 @@ import { ROAD } from './RoadPath.js';
 import { RoadGenerator } from './RoadGenerator.js';
 import { TerrainGenerator } from './TerrainGenerator.js';
 import { RoadFurniture } from './RoadFurniture.js';
+import { RoadStructures } from './RoadStructures.js';
 
 export class WorldManager {
   constructor(scene, path) {
@@ -11,6 +12,7 @@ export class WorldManager {
     this.road = new RoadGenerator(path);
     this.terrain = new TerrainGenerator(path);
     this.furniture = new RoadFurniture(path);
+    this.structures = new RoadStructures(path);
     this.origin = { x: 0, y: 0, z: 0, s: NaN };
     this.chunks = [];
     this.recycled = 0;
@@ -19,9 +21,10 @@ export class WorldManager {
         road = this.road.create(),
         terrain = this.terrain.create();
       const furniture = this.furniture.create();
-      group.add(terrain, road, furniture);
+      const structures = this.structures.create();
+      group.add(terrain, road, furniture, structures);
       scene.add(group);
-      this.chunks.push({ index: null, group, road, terrain, furniture, anchor: null });
+      this.chunks.push({ index: null, group, road, terrain, furniture, structures, anchor: null });
     }
     this.update(24);
   }
@@ -52,6 +55,7 @@ export class WorldManager {
       this.road.rebuild(chunk.road, next * ROAD.chunkLength, chunk.anchor);
       this.terrain.rebuild(chunk.terrain, next * ROAD.chunkLength, chunk.anchor);
       this.furniture.rebuild(chunk.furniture, next * ROAD.chunkLength, chunk.anchor);
+      this.structures.rebuild(chunk.structures, next * ROAD.chunkLength, chunk.anchor);
       this.recycled++;
     }
     // CPU meshes retain their small chunk-local coordinates. A rebase only moves groups.
@@ -88,5 +92,6 @@ export class WorldManager {
     this.road.dispose();
     this.terrain.dispose();
     this.furniture.dispose();
+    this.structures.dispose();
   }
 }

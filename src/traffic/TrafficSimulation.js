@@ -1,5 +1,6 @@
 import { hash, clamp } from '../core/math.js';
 import { accelerationFor, canOvertake } from './TrafficAI.js';
+import { roadBox, distanceBoxes } from '../physics/CollisionSystem.js';
 
 export const VEHICLES = [
   { id: 'sedan', width: 1.8, length: 4.5, height: 1.45, cruise: 24 },
@@ -157,6 +158,27 @@ export class TrafficSimulation {
         (a.dir === 1 ? 0 : Math.PI) + Math.atan2(lateral / dt, Math.max(a.speed, 2)) * a.dir;
     }
     // Hard nonpenetration constraint backs up the continuous car-following AI.
+    // Solve front-to-back so a queue is resolved in one ordered sweep. An
+    // unordered pair projection can push cars backwards through a whole queue.
+    const ordered = [...actors].sort((a, b) =>
+      a.dir === b.dir ? (b.s - a.s) * a.dir : b.dir - a.dir,
+    );
+    for (const follower of ordered) {
+      for (const front of ordered) {
+        if (
+          follower === front ||
+          follower.dir !== front.dir ||
+          (front.s - follower.s) * follower.dir <= 0 ||
+          Math.abs(front.d - follower.d) >= front.halfWidth + follower.halfWidth + 0.18
+        )
+          continue;
+        const limit = front.s - follower.dir * (front.halfLength + follower.halfLength + 0.5);
+        if ((follower.s - limit) * follower.dir > 0) {
+          follower.s = limit;
+          follower.speed = Math.min(follower.speed, front.speed);
+        }
+      }
+    }
     for (let iteration = 0; iteration < 2; iteration++)
       for (let i = 0; i < actors.length; i++)
         for (let j = i + 1; j < actors.length; j++) {
@@ -183,10 +205,10 @@ export class TrafficSimulation {
         previous = (player.prevS ?? player.s) - a.prevS,
         extent = a.halfLength + 1.08;
       if (Math.abs(relative) < extent + 3) {
-        const width =
-          0.36 * Math.abs(Math.cos(player.headingError || 0)) +
-          1.08 * Math.abs(Math.sin(player.headingError || 0));
-        a.closest = Math.min(a.closest, Math.abs(player.d - a.d) - a.halfWidth - width);
+        a.closest = Math.min(
+          a.closest,
+          distanceBoxes(roadBox(this.path, playerActor), roadBox(this.path, a)),
+        );
       }
       if (!a.passed && previous <= extent && relative > extent) {
         a.passed = true;
