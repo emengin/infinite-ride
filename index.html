@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#171c1c" />
+    <meta
+      name="description"
+      content="INFINITE RIDE. The Road Never Ends. Sonsuz yolda motosiklet sürüşü."
+    />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <title>INFINITE RIDE — The Road Never Ends.</title>
+  </head>
+  <body>
+    <canvas id="game" aria-label="INFINITE RIDE üç boyutlu sürüş alanı"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="wordmark" href="./" aria-label="INFINITE RIDE başlangıç"
+        ><span class="brand-symbol">//</span> INFINITE<span>RIDE</span></a
+      >
+      <div class="stage-tag"><i></i> AŞAMA 01 <span> / OYNANABİLİR ÇEKİRDEK</span></div>
+      <button class="icon-button" id="pause-button" aria-label="Duraklat" title="Duraklat · Esc">
+        Ⅱ
+      </button>
+    </header>
+    <main id="interface">
+      <section class="intro overlay" id="intro" aria-labelledby="intro-title">
+        <div class="intro-content">
+          <p class="eyebrow"><span></span> BİR YOL. SONSUZ OLASILIK.</p>
+          <h1 id="intro-title">INFINITE<br /><em>RIDE.</em></h1>
+          <p class="tagline">The Road Never Ends.</p>
+          <p class="intro-copy">
+            Kontak sende. Önünde kıvrılan bir yol,<br />uzakta tepeler. Sadece sür.
+          </p>
+          <button class="primary" id="start-button">SÜRÜŞE BAŞLA <span>↗</span></button>
+          <div class="intro-meta">
+            <span>01 — SERBEST SÜRÜŞ</span><span>TRAFİKSİZ · GÜNDÜZ</span>
+          </div>
+        </div>
+        <div class="intro-bottom">
+          <span>Yolculuk senin ritminde.</span
+          ><span>W / A / S / D <b>ile sür</b> &nbsp; C <b>kamera</b></span>
+        </div>
+      </section>
+      <section class="hud" id="hud" hidden aria-label="Sürüş göstergeleri">
+        <div class="route-label">
+          <span class="eyebrow">SERBEST SÜRÜŞ</span><strong>Açık tepeler</strong
+          ><span class="route-status" id="surface-label">ASFALT · İYİ TUTUŞ</span>
+        </div>
+        <div class="journey">
+          <span class="small-label">YOLCULUK</span
+          ><strong><span id="distance">0.00</span> <small>KM</small></strong
+          ><span class="journey-line"></span>
+        </div>
+        <div class="speedometer">
+          <div class="speed-top">
+            <span id="gear">N</span><span class="small-label">KM / H</span>
+          </div>
+          <div class="speed-value" id="speed">000</div>
+          <div class="speed-bar"><i id="speed-bar"></i></div>
+          <div class="speed-bottom"><span id="drive-label">HAZIR</span><span>IR / 600</span></div>
+        </div>
+        <div class="ride-bottom">
+          <span class="camera-label"><i></i><span id="camera-label">TAKİP KAMERASI</span></span
+          ><span class="keyboard-help"
+            ><kbd>W</kbd> Gaz <kbd>S</kbd> Fren <kbd>A</kbd><kbd>D</kbd> Yön <kbd>C</kbd> Kamera
+            <kbd>R</kbd> Yola dön <kbd>Esc</kbd> Duraklat</span
+          >
+        </div>
+      </section>
+      <section class="pause overlay panel-overlay" id="pause" hidden aria-labelledby="pause-title">
+        <div class="panel">
+          <p class="eyebrow">BİR NEFES MOLASI</p>
+          <h2 id="pause-title">Yol bekler.</h2>
+          <p>Hazır olduğunda kaldığın yerden devam et.</p>
+          <button class="primary" id="resume-button">SÜRÜŞE DÖN <span>↗</span></button
+          ><button class="secondary" id="reset-button">Yeniden başla</button
+          ><button class="text-button" id="menu-button">Başlangıca dön</button>
+          <div class="panel-note">
+            W / ↑ Gaz &nbsp; S / ↓ Fren &nbsp; A D / ← → Yön<br />C / V Kamera &nbsp; R Yola dön
+            &nbsp; F3 Telemetri
+          </div>
+        </div>
+      </section>
+      <div class="toast" id="toast" role="status" hidden></div>
+      <pre id="debug" hidden></pre>
+      <div id="touch-controls" hidden aria-label="Dokunmatik sürüş kontrolleri">
+        <div class="touch-steer">
+          <button data-control="left" aria-label="Sola dön">◀</button
+          ><button data-control="right" aria-label="Sağa dön">▶</button>
+        </div>
+        <button class="touch-camera" id="touch-camera" aria-label="Kamerayı değiştir">
+          KAMERA
+        </button>
+        <div class="touch-pedals">
+          <button data-control="brake" aria-label="Fren">FREN</button
+          ><button data-control="throttle" aria-label="Gaz">GAZ</button>
+        </div>
+      </div>
+      <section class="error overlay panel-overlay" id="error" hidden>
+        <div class="panel">
+          <p class="eyebrow">GÖRÜNTÜ BAŞLATILAMADI</p>
+          <h2>Bir teknik mola.</h2>
+          <p id="error-message"></p>
+          <button class="primary" id="reload-button">Yeniden yükle <span>↗</span></button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
