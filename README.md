@@ -1,19 +1,100 @@
 # INFINITE RIDE
 
-**The Road Never Ends.** — v1.1.0
+**The Road Never Ends.**
 
-Three.js ile geliştirilmiş, tamamen tarayıcıda çalışan bağımsız bir motosiklet oyunu. Sonsuz yollar, dört procedural biyom, iki yönlü trafik ve üç oynanabilir mod içerir. Backend, hesap, ücretli API veya oyun sırasında CDN'den indirilen varlık gerekmez.
+Sonsuz yollarda motosiklet sürün, iki yönlü trafikte aralıkları değerlendirin veya yapay zekâ rakiplere karşı yarışın. INFINITE RIDE, dört farklı doğa ortamını üç oyun moduyla birleştiren, doğrudan tarayıcıda oynanabilen bağımsız bir 3D motosiklet oyunudur.
 
-## Çalıştırma
+**[Hemen oynayın → INFINITE RIDE](https://emengin.github.io/infinite-ride/)**
 
-Node.js **22.12+** gerekir; önerilen sürüm **24 LTS**.
+Hesap, eklenti veya ek oyun kurulumu gerekmez. **Güncel sürüm: 1.1.1.**
+
+![INFINITE RIDE — gerçek oyun içi ana menü](public/assets/preview.png)
+
+## Sürüşe başlayın
+
+1. Ana menüden **Serbest Sürüş**, **Trafikte Hız** veya **Yarış** modunu seçin.
+2. Rotayı ve trafik yoğunluğunu belirleyip **SÜRÜŞE BAŞLA** düğmesine basın.
+3. Hızlanmak için W veya ↑ tuşunu basılı tutun. Direksiyon manueldir; virajları A/D veya ←/→ ile alın.
+4. Viraja girmeden önce yavaşlayın. Kamerayı C ile değiştirin; gerektiğinde R ile güvenle yola dönün.
+
+## Üç farklı oyun modu
+
+| Mod                             | Deneyim                                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Free Ride — Serbest Sürüş**   | Süre ve skor baskısı olmadan sonsuz yolculuk. Biyom, trafik, kamera ve günün saati ayarlanabilir. Mola menüsünden sürüş özeti alınabilir.                                 |
+| **Traffic Rush — Trafikte Hız** | Hız, mesafe, sollama ve yakın geçişlerle puan kazanın. Art arda başarılı hareketler combo çarpanını artırır. Çarpışma sürüşü bitirir; en iyi skor bu tarayıcıda saklanır. |
+| **Race — Yarış**                | NOVA, ATLAS ve ECHO'ya karşı 3 km yarış. Geri sayım, üç kontrol noktası, canlı sıralama ve bitiş sonuçları bulunur. Yola dönme işlemi yarış süresine ceza ekler.          |
+
+Trafik; sedan, hatchback, SUV, spor otomobil, kamyon, otobüs ve motosikletlerden oluşur. Araçlar takip mesafesine, yol eğriliğine ve uygun sollama boşluklarına tepki verir. Yarış rakipleri aynı yol yüzeyini ve sürüş fiziğini kullanır.
+
+## Kontroller
+
+| Girdi                    | İşlev                                      |
+| ------------------------ | ------------------------------------------ |
+| W / ↑                    | Gaz                                        |
+| S / ↓                    | Fren                                       |
+| A D / ← →                | Direksiyon                                 |
+| Shift                    | Gazla birlikte nitro                       |
+| C / V                    | Takip, kask ve geniş takip kamerası        |
+| R                        | Mevcut güzergâhta güvenle sağ şeride dönme |
+| Esc / duraklatma düğmesi | Mola / devam                               |
+| Ana menüde ↑ / ↓, Enter  | Mod seçimi ve sürüşü başlatma              |
+| F3                       | İsteğe bağlı performans göstergesi         |
+
+Nitro kullanımda azalır; bırakıldığında yeniden dolar. Asfalt dışına çıkıldığında tutuş ve hızlanma azalır. Free Ride ve Race'te çarpışma sonrası yola dönülebilir; Traffic Rush'ta kaza sonuç ekranını açar.
+
+Dokunmatik cihazlarda gaz, fren, yön, nitro ve kamera düğmeleri görünür. Gaz ve direksiyon aynı anda kullanılabilir; portre ve yatay yerleşim desteklenir. Pencere veya sekme odağı kaybolduğunda oyun duraklar ve basılı girdiler bırakılır. Tam ekran, destekleyen tarayıcılarda ana menüden açılabilir.
+
+## Yollar ve atmosfer
+
+- **Forest Road:** Orman kümeleri, yeşil arazi ve sisli uzaklıklar.
+- **Coastal Road:** Deniz manzarası, kıyı kayalıkları ve açık ufuk.
+- **Mountain Pass:** Kayalık yükseltiler, virajlar ve dağ tünelleri.
+- **Highland Road:** Açık yaylalar, seyrek bitki örtüsü ve geniş görüş.
+
+Keşif rotası ortamlar arasında yumuşak geçişler yapar. Dünya kodu aynı güzergâhın yeniden oluşturulmasını sağlar. Köprüler, tüneller, yol çizgileri, bariyerler ve uyarı işaretleri üretilen yolu takip eder.
+
+Gün doğumu, gündüz, gün batımı, gece veya dinamik gün döngüsü seçilebilir. Gökyüzü, ışık, sis ve farlar atmosfere göre değişir. Kalite, çözünürlük ve trafik yoğunluğu farklı cihazlara göre ayarlanabilir.
+
+## Kullanılan teknolojiler
+
+| Teknoloji                               | Kullanım                                                             |
+| --------------------------------------- | -------------------------------------------------------------------- |
+| Three.js 0.187.0 ve WebGL 2             | Üç boyutlu dünya, motosiklet, trafik, ışık, gölge ve kameralar       |
+| JavaScript ES modülleri                 | Oyun yaşam döngüsü, fizik, trafik yapay zekâsı ve modlar             |
+| HTML5, CSS ve SVG                       | Türkçe arayüz, dijital göstergeler, menüler ve dokunmatik kontroller |
+| 120 Hz sabit adımlı arcade fizik        | Gaz, fren, manuel direksiyon, yatış, yüzey teması ve nitro           |
+| Seed tabanlı prosedürel üretim          | Tekrarlanabilir sonsuz yol, arazi ve biyom geçişleri                 |
+| InstancedMesh, parça ve nesne havuzları | Çevre/araç çizimi ve kaynakların yeniden kullanılması                |
+| Floating origin                         | Uzun sürüşlerde çizim koordinatlarının küçük tutulması               |
+| Web Audio API                           | Hıza ve sürüş durumuna tepki veren motor, rüzgâr ve trafik sesleri   |
+| localStorage                            | Bu tarayıcıdaki ayarlar ve kişisel rekorlar                          |
+| Vite 8.3.8 ve Node.js                   | Geliştirme, üretim derlemesi ve otomatik testler                     |
+| Playwright                              | Gerçek tarayıcıda oynanış, yerleşim ve güvenlik kontrolleri          |
+| GitHub Actions ve Pages                 | Test edilen statik oyunun HTTPS üzerinden yayınlanması               |
+
+Motosiklet, sürücü, trafik modelleri, çevre, dokular ve sesler kodla oluşturulur. Oyun çalışırken model, font, müzik, CDN veya harici yapay zekâ servisi indirilmez.
+
+## Gizlilik ve güvenlik
+
+Oyun hesap açmaz; ayarları veya skorları bir oyun sunucusuna göndermez. Tercihler ve rekorlar `localStorage` içinde bu tarayıcıda saklanır. Site verileri silinerek temizlenebilir; kayıtlar cihazlar arasında otomatik paylaşılmaz. Çevrimiçi skor tablosu bulunmaz.
+
+Üretim sayfası dış bağlantıları ve yetkisiz betik yürütmeyi kısıtlayan bir içerik güvenliği politikası kullanır. Test kontrolü genel yayın adresinde açılmaz. Siteye bağlanırken GitHub Pages standart barındırma bilgilerini işleyebilir; oyun analiz veya reklam kodu çalıştırmaz.
+
+Güvenlik bildirimleri için [SECURITY.md](SECURITY.md), sıradan hata bildirimleri için [Issues](https://github.com/emengin/infinite-ride/issues) kullanılabilir.
+
+## Desteklenen deneyim
+
+WebGL 2 destekli güncel bir tarayıcı ve donanım hızlandırma önerilir. Dokunmatik kontroller mevcut olsa da gerçek telefon performansı cihaz ve grafik ayarlarına bağlıdır. Fizik arcade türündedir; görseller stilizedir. Tam rijit cisim/ragdoll simülasyonu, çok şeritli otoyollar ve çevrimiçi çok oyunculu mod bu sürümde bulunmaz.
+
+## Geliştirme ve yerel çalıştırma
+
+Node.js **22.12+** gerekir; **24 LTS** önerilir.
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
-
-Terminalde gösterilen adresi açıp **SÜRÜŞE BAŞLA** düğmesine tıklayın. Motor durarak başlar; **W** tuşunu basılı tutun. Windows PowerShell `npm.ps1` dosyasını engelliyorsa komutlarda `npm` yerine **`npm.cmd`** kullanın; sistem güvenlik ayarını değiştirmeniz gerekmez.
 
 Üretim sürümü:
 
@@ -22,115 +103,26 @@ npm run build
 npm run preview
 ```
 
-Önizleme: <http://127.0.0.1:4173/>. ZIP içindeki `dist/` hazır statik oyundur. `index.html` dosyasını çift tıklamak yerine HTTP sunucusu kullanın; `file://` üzerinden ES modülleri tarayıcılarca engellenebilir.
+Yerel önizleme `http://127.0.0.1:4173/` adresinde açılır. ES modülleri nedeniyle `index.html` doğrudan çift tıklamak yerine HTTP üzerinden sunulmalıdır. Derlenmiş `dist/` içeriği yerel bir sunucuda internet bağlantısı olmadan çalışabilir. Windows PowerShell `npm.ps1` dosyasını engelliyorsa komutlarda `npm.cmd` kullanılabilir.
 
-## Oyun modları
-
-| Mod              | Oynanış                                                                                                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **FREE RIDE**    | Sonsuz sürüş. Trafik, biyom, saat ve kamera seçilebilir. Duraklatma menüsünden yolculuk özeti alınabilir.                                                                            |
-| **TRAFFIC RUSH** | Mesafe, hız, sollama, yakın geçiş ve karşı şeritte risk puan getirir. Combo 7 saniye içinde yeni hareketle korunur. Kaza sürüşü bitirir; en iyi skor cihazda saklanır.               |
-| **RACE**         | NOVA, ATLAS ve ECHO'ya karşı 3 km yarış. 3 saniyelik geri sayım, 750/1500/2250 m kontrol noktaları, bitiş çizgisi, sıralama ve sonuç ekranı vardır. Kurtarma +3 saniye ceza getirir. |
-
-Rakipler aynı yol yüzeyi ve motosiklet fiziğini kullanır. Trafik araçlarını ve diğer yarışçıları hesaba katarlar. Bitişe ulaşan rakipler çizginin üstünde durmaz, yolu boşaltır.
-
-## Kontroller
-
-| Girdi               | İşlev                                                      |
-| ------------------- | ---------------------------------------------------------- |
-| W / ↑               | Gaz; basılı tutun                                          |
-| S / ↓               | Fren                                                       |
-| A D / ← →           | Sola / sağa yönelme                                        |
-| Shift               | Gazla birlikte nitro; kullanımda azalır, bırakılınca dolar |
-| C / V               | Takip → kask → sinematik kamera                            |
-| R                   | Aynı güzergâh noktasında sağ şeride dön; hız sıfırlanır    |
-| Esc / sağ üst düğme | Duraklat / devam et                                        |
-| F3                  | İsteğe bağlı motor/FPS telemetrisi                         |
-
-Dokunmatik cihazlarda gaz, fren, yön, nitro, kamera ve duraklatma düğmeleri bulunur. Gaz ve yön birlikte tutulabilir. Portre ve yatay yerleşim desteklenir. Pencere veya sekme odağı kaybolunca oyun duraklar ve girdiler bırakılır.
-
-Direksiyon tamamen manueldir: motor yolu kendi kendine takip etmez, tuş bırakıldığında kendiliğinden sağa/sola dönmez. Virajları A/D veya yön tuşlarıyla alın; kamera oyuncunun sürüş yönünü izler. Yüksek hızda tutuş sınırı aşılabilir; virajdan önce frenleyin. Toprakta hızlanma ve tutuş azalır. Bariyer, ağaç/kaya veya araçla çarpışma görünür ve sesli tepki oluşturur. Free Ride ve Race'te güvenli dönüş mümkündür; Rush'ta kaza sonuç ekranına götürür.
-
-v1.1 arayüzü motosikleti gösteren ana menü, üç mod kartı, rota/trafik seçim alanı, dijital hız/devir/nitro göstergesi ve yeni duraklatma/ayar/sonuç ekranları içerir. Ana menüde ↑/↓ mod değiştirir, Enter sürüşü başlatır. Sağ üst düğme desteklenen tarayıcılarda tam ekranı açıp kapatır. Portre ve yatay dokunmatik yerleşimler ayrıca düzenlenmiştir.
-
-## Dünya ve ayarlar
-
-- **Forest Road:** yoğun çam/karma orman, yeşil zemin ve pus.
-- **Highland Road:** açık yaylalar, seyrek bitki örtüsü, geniş görüş.
-- **Mountain Pass:** yükselen kayalıklar, zirveler ve dağ tünelleri.
-- **Coastal Road:** kıyı kayalıkları, deniz ve açık ufuk.
-
-Keşif seçeneğinde biyomlar yaklaşık 1.8 km bölümlerle ve 450 m yumuşak geçişlerle değişir. Viraj/eğim parametreleri ve çevre renkleri birlikte örneklenir. Yol 128 m parçalardan oluşur; 12 parça yeniden kullanılır ve 512 m aralıkla floating origin uygulanır. Köprüler ve dağ tünelleri yolun eğimini takip eder; tünelde far otomatik açılır.
-
-Ayarlar menüsündeki kalite, çözünürlük, kamera, kontrol hassasiyeti, trafik yoğunluğu, biyom, günün saati, hava ve ses gerçek sistemlere bağlıdır. Saat seçenekleri gün doğumu, gündüz, gün batımı, gece ve **12 dakikalık dinamik döngüdür**. Hava açık veya puslu olabilir. Gece motosikletin gerçek spot farı ve yakındaki araçlar için sınırlı bir ışık havuzu kullanılır.
-
-Ayarlar ve rekorlar `localStorage` içinde bu cihazda saklanır. Depolama kullanılamazsa oyun çalışmaya devam eder. Yarış sırasında güzergâh ve trafik kilitlidir; diğer ayarlar değiştirilebilir. Biyom değişikliği motosikleti güvenle sağ şeride alır. Düşük FPS'de çözünürlük ölçeği kontrollü azaltılır; sabit parça ve araç havuzları korunur.
-
-Varsayılan yol seed'i **7049**. Aynı seed ve biyom seçimi aynı yolu üretir. Örnek adresler:
-
-```text
-/?seed=benim-yolum
-/?biome=coastal&time=sunset&traffic=low
-/?mode=race
-/?debug=1
-```
-
-`?test=1&debug=1` yalnızca regresyon testlerinde senaryo kurma/hızlandırılmış fizik sürüşü için kullanılır. Normal oyunda bu sürücü açılmaz.
-
-## Testler
+### Doğrulama
 
 ```sh
 npm test
-```
-
-34 Node testi; FPS bağımsız fizik, gerçek asfalt mesh'ine raycast ile temas, yol birleşimleri, seed, biyom geçişleri, köprü/tünel, kaynak havuzları, trafik/sollama/çarpışma, yarış AI'sı, skor/kayıt, nitro ve saat döngüsünü kapsar. Yeni regresyonlar girdisiz yön/yatış, tuş bırakma sonrası salınım ve dünya sınırında otomatik yön düzeltme olmamasını doğrular. Gaz/fren/nitro testleri düz bir yol fikstüründe, AI yol yardımı ayrıca açıkça etkinleştirilerek test edilir.
-
-Tarayıcı testleri için bir kez:
-
-```sh
+npm audit
 npx playwright install chromium
 npm run build
 npm run test:e2e
-npm run test:soak
 ```
 
-`test:e2e`, gerekiyorsa üretim önizlemesini başlatır ve klavye/dokunma, dört biyom, trafik, üç mod, ses/ayarlar, yaşam döngüsü, portre/yatay görünüm ve Pages alt yol testlerini sırayla çalıştırır. `test:soak`, 24 dakikalık hızlandırılmış tam oyun sürüşünü ve ayrı bir gerçek zamanlı FPS aralığını denetler. Hızlandırılmış simülasyon sırasında grafik karesi beklenmez; FPS ölçümü ayrıca gerçek `requestAnimationFrame` zamanlarıyla yapılır.
+34 Node testi fizik, yol sürekliliği, biyomlar, trafik, çarpışmalar, modlar, kayıt, nitro ve atmosferi kapsar. Tarayıcı paketi oynanış, gerçek yarış bitişi, dokunma, ayarlar, ses, yaşam döngüsü, güvenlik ve Pages alt yolunu doğrular. `npm run test:soak` hızlandırılmış uzun sürüşü ayrıca denetler. Kapsam ve sınırlar [TEST_REPORT.md](TEST_REPORT.md) içinde belirtilmiştir.
 
-Sonuç JSON'ları ve görüntüler `artifacts/` altındadır. [TEST_REPORT.md](TEST_REPORT.md) gerçek sonuçları ve test sınırlarını belirtir. Windows testleri kullanılabilir GPU için D3D11'i seçer; diğer sistemlerde Chromium'un varsayılan arka ucu kullanılır. Gerçek telefonlar ve bütün tarayıcı/donanımlar için aynı performans garanti edilmez.
+### Kod yapısı ve yayın
 
-## Kod yapısı
+`src/core` yaşam döngüsünü, `src/world` dünya üretimini, `src/motorcycle` modeli/fiziği, `src/traffic` trafiği, `src/modes` oyun modlarını, `src/rendering` sahne/kamerayı yönetir. `src/ui` arayüzü, `src/audio` sesi içerir. [Tasarım kapsamı](docs/PROJECT_BRIEF.md) ve [proje durumu](PROJECT_STATE.md) teknik kararları belgeler.
 
-| Dizin                   | Sorumluluk                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| `src/core/`             | Oyun yaşam döngüsü, girdi, sabit adım, kayıt, performans ve test sürücüsü             |
-| `src/world/`            | Tek yol/yüzey kaynağı, biyomlar, arazi, yol yapıları, parça havuzu ve saat            |
-| `src/motorcycle/`       | Saf sürüş fiziği ve bağımsız özgün model/animasyon                                    |
-| `src/traffic/`          | Araç geometrileri, sabit havuz, takip/sollama AI'sı ve instanced çizim                |
-| `src/physics/`          | Dünya koordinatlarında süpürülmüş yönlü kutu çarpışmaları ve geometrik geçiş mesafesi |
-| `src/modes/`            | Serbest/Rush oturumu, yarış AI'sı, kontrol noktaları ve bitiş kapısı                  |
-| `src/rendering/`        | Render, ışık, gökyüzü, far havuzu ve üç kamera                                        |
-| `src/audio/`, `src/ui/` | Web Audio sentezi ve arayüz                                                           |
-
-Yol doğrultusundaki `s` ve sağa doğru `d` metre cinsindedir. Yol ve arazi 4 m örneklemeyi ve üçgen köşegenlerini paylaşır. Motosiklet görünür yol yüzeyini takip eder; bağımsız düz bir fizik zemini yoktur. GPU koordinatları her zaman parça/origin çevresinde küçüktür. Geliştirme kaydı ve devam noktası [PROJECT_STATE.md](PROJECT_STATE.md) dosyasındadır. Özgün ürün hedefi `docs/PROJECT_BRIEF.md` içinde korunmuştur.
-
-## GitHub Pages
-
-1. Projeyi kendi GitHub deponuza gönderin; varsayılan dal `main` olsun.
-2. **Settings → Pages → Build and deployment → Source → GitHub Actions** seçin.
-3. `.github/workflows/deploy.yml`, `main` push'unda kurulum, Node testleri, üretim build'i ve Chromium alt-yol kontrolü yapıp `dist/` çıktısını yayınlar. Elle de tetiklenebilir.
-
-Vite **`base: './'`** kullanır. Hem kullanıcı kökü hem `https://kullanici.github.io/depo-adi/` altında çalışır. Depo adı değişince base'i değiştirmeniz gerekmez. Mutlak base isterseniz proje deposunda `'/yeni-depo-adi/'`, kullanıcı deposu/özel alan adında `'/'` kullanın. Bütün çalışma varlıkları paketin içindedir. Gerçek GitHub hesabına push veya yayın bu geliştirme oturumunda yapılmadı.
-
-## Bilinen sınırlar
-
-- Görsel tarz özgün, stilize procedural geometridir; fotogerçekçi taranmış/GLB varlık paketi değildir.
-- Fizik manuel arcade direksiyon, yüzey takibi ve yönlü kutu çarpışmaları kullanır. AI rakipler açıkça etkinleştirilen yol yardımı kullanır. Tam rijit cisim/ragdoll simülasyonu yoktur.
-- Yol her yönde bir şerittir. Genişleyen çok şeritli otoyollar bu sürümde yoktur.
-- Sesler dinamiktir ancak sentezlenmiştir; gerçek motosiklet kayıtları kullanılmaz.
-- Gerçek mobil donanım, Safari/Firefox, saatler süren duvar saati oynanışı ve canlı GitHub dağıtımı ayrıca doğrulanmalıdır.
+Vite `base: './'` kullanır; üretim dosyaları kökte veya bir alt klasörde çalışabilir. `main` değişiklikleri GitHub Actions tarafından denetlenir, derlenir, test edilir ve Pages'e yayınlanır. Test/derleme işi yayın yetkisi taşımaz; pull request'ler canlıya dağıtım yapmaz.
 
 ## Varlıklar ve lisanslar
 
-Motosiklet/sürücü, yedi trafik modeli, çevre, yapılar, dokular, gökyüzü, kokpit ve sesler proje kodunda üretilir. Dış model, ses, font veya görsel indirilmedi; sistem fontları kullanılır. Çalışma bağımlılığı **Three.js (MIT)**; geliştirme araçları **Vite (MIT)** ve **Playwright (Apache-2.0)**. Three.js lisansı [public/assets/licenses/three.LICENSE.txt](public/assets/licenses/three.LICENSE.txt) içindedir ve `dist/` paketine kopyalanır. Diğer lisanslar ilgili npm paketlerinde bulunur. Kaynak kod için ayrıca bir açık kaynak lisansı seçilmedi; bunu proje sahibi belirleyebilir.
-
-Teknik kaynaklar: [Three.js belgeleri](https://threejs.org/docs/), [Vite Pages dağıtımı](https://vite.dev/guide/static-deploy.html#github-pages), [Web Audio uygulama notları](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices).
+Bağımlılıklar ve özgün içerikler [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) içinde açıklanmıştır. Three.js MIT, Vite MIT ve Playwright Apache-2.0 lisanslıdır. Proje kodu için ayrıca bir açık kaynak lisansı atanmış değildir.

@@ -1,7 +1,8 @@
 {
   "name": "infinite-ride",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "description": "INFINITE RIDE — Endless motorcycle riding, traffic and racing",
   "scripts": {
@@ -11,6 +12,7 @@
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser.mjs",
     "test:pages": "node tests/pages.mjs",
+    "test:security": "node tests/security-browser.mjs",
     "test:e2e": "node tests/run-browser.mjs",
     "test:soak": "node tests/run-browser.mjs --soak"
   },

@@ -40,7 +40,10 @@ const server = createServer(async (req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const browser = await chromium.launch({
   headless: true,
-  args: process.platform === 'win32' ? ['--use-angle=d3d11', '--enable-gpu'] : [],
+  args:
+    process.platform === 'win32'
+      ? ['--use-angle=d3d11', '--enable-gpu']
+      : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });

@@ -1,6 +1,6 @@
-# INFINITE RIDE v1.1.0 — Doğrulama
+# INFINITE RIDE v1.1.1 — Doğrulama
 
-**16 Kasım 2026 · Aşama 1–6 + arayüz ve manuel direksiyon güncellemesi**
+**17 Kasım 2026 · Üretim güvenliği ve GitHub Pages yayını**
 
 ## Son sonuçlar
 
@@ -9,7 +9,7 @@
 | `npm install`       | Başarılı; 19 paket denetlendi, 0 güvenlik açığı bildirildi                                          |
 | `npm test`          | **34 / 34 geçti**                                                                                   |
 | `npm run build`     | Başarılı; `dist/` hazır                                                                             |
-| `npm run test:e2e`  | Sekiz tarayıcı test dosyası başarılı                                                                |
+| `npm run test:e2e`  | Dokuz tarayıcı test dosyası başarılı                                                                |
 | Çekirdek oynanış    | **21 kontrol**; gaz/fren/yön/kamera, gerçek sürüş/rebase, pause/restart ve dokunma                  |
 | Dünya               | **4 biyom** render/konsol kontrolü ve görsel inceleme                                               |
 | Trafik              | **6 senaryo**; yedi model, kaza/kurtarma, yakın geçiş ve durağan oyuncuya gelen araç                |
@@ -20,6 +20,14 @@
 | Pages               | `/renamed-infinite-ride/` altında üretim paketi açıldı ve sürüldü; hatalı istek yok                 |
 
 Son e2e paketinde JavaScript/WebGL konsol hatası veya runtime exception görülmedi. Asset ve üretim alt-yol yüklemeleri geçti. Three.js vendor parçası yaklaşık **546.46 kB minify / 135.44 kB gzip**; Vite'nin 500 kB uyarısı motor paketinin büyüklüğüdür, build başarısızlığı değildir.
+
+## Üretim güvenliği
+
+Dört yeni tarayıcı senaryosu geçti: genel hostta `?debug=1&test=1` ile test/snapshot API'si açılmıyor; aynı üretim paketi CSP altında sürüş, pause, ayarlar ve kamerayı çalıştırıyor; zararsız satır içi betik ve dış bağlantı denemeleri engelleniyor; açık loopback test otomasyonu regresyonlar için kullanılabiliyor.
+
+`npm audit` üretim ve geliştirme bağımlılıklarında 0 bilinen açık bildiriyor. Tam Git geçmişindeki 143 blob ve mevcut kaynaklar bilinen erişim/özel anahtar desenleriyle tarandı; eşleşme veya kişisel bilgisayar yolu bulunmadı. Bu desen taraması her olası gizli bilgiyi bulma garantisi değildir. Kimlik bilgileri test veya yayın dosyalarına eklenmedi.
+
+CI eylemleri resmi etiketlerin tam commit kimliklerine sabitlendi. Test/derleme işi yalnızca kaynak okur; Pages ve OIDC yayın yetkileri dağıtım işine ayrıldı. Pull request'ler yayın yapmaz. Ortam/özel anahtar dosyaları ignore kurallarıyla korunur.
 
 ## Fizik, yol ve AI kapsamı
 
@@ -52,7 +60,7 @@ Yeni arayüz 1440×900, 1366×768, 1280×720, 1024×600, 390×844, 360×740 ve 8
 
 Web Audio, kullanıcı tıklamasından önce açılmadı. Tıklamadan sonra AudioContext çalıştı; analizör RMS çıkışı sıfırdan farklıydı. Gazla RPM ve rüzgâr parametreleri arttı; ses seviyesi sıfırken RMS <0.0001 oldu. Bu, sinyal/işlev doğrulamasıdır; kayıt stüdyosu düzeyinde öznel ses değerlendirmesi yapıldığı iddia edilmez.
 
-## Uzun sürüş ve performans
+## Önceki uzun sürüş ölçümü — v1.1.0 / 16 Kasım 2026
 
 Manuel fizik ile **24 dakikalık hızlandırılmış tam oyun testi geçti**. En yoğun trafikte yaklaşık **16.82 km** simülasyon sürüşü ve ardından gerçek zamanlı sürüş aralığıyla toplam **17.04 km** ilerleme gerçekleşti. Her 120 simüle saniyede trafik ilerlemeye devam etti; hata/kaza olmadı. **12 dünya parçası**, **56 araçlık havuz**, son durumda **137 GPU geometrisi / 5 doku** vardı. Geometri sayısı ilk kez görülen kaynaklar GPU'ya yüklendikten sonra sabit kaldı.
 
@@ -78,6 +86,6 @@ Kalite kontrolünde düzeltilen önemli sorunlar:
 
 ## Sınırlar
 
-Gerçek telefon GPU/ısı/pil koşulları, Safari/Firefox ve saatlerce duvar saati sürüşü test edilmedi. GitHub Pages'e gerçek hesap üzerinden yayın yapılmadı; yerel üretim alt yol testi geçti ve Actions workflow'u hazırdır. İlk Windows headless denemesinde SwiftShader düşük FPS verdi; donanım D3D11 seçilerek ölçüm yapıldı. Her donanım için 60 FPS garantisi verilmez. Fizik arcade ve görseller stilizedir; tam rijit cisim/ragdoll veya fotogerçekçilik doğrulaması iddia edilmez.
+Gerçek telefon GPU/ısı/pil koşulları, Safari/Firefox ve saatlerce duvar saati sürüşü test edilmedi. Üretim alt yol testi geçti; canlı Pages doğrulaması yayın kaydında ayrıca belgelenir. İlk Windows headless denemesinde SwiftShader düşük FPS verdi; donanım D3D11 seçilerek ölçüm yapıldı. Her donanım için 60 FPS garantisi verilmez. Fizik arcade ve görseller stilizedir; tam rijit cisim/ragdoll veya fotogerçekçilik doğrulaması iddia edilmez.
 
-Ham kayıtlar: `browser-results.json`, `world-results.json`, `traffic-results.json`, `modes-results.json`, `polish-results.json`, `interface-results.json`, `audit-results.json`, `pages-results.json`, `soak-results.json`.
+Ham kayıtlar: `browser-results.json`, `world-results.json`, `traffic-results.json`, `modes-results.json`, `polish-results.json`, `interface-results.json`, `audit-results.json`, `pages-results.json`, `security-results.json`, `soak-results.json`.

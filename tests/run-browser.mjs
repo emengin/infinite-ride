@@ -41,6 +41,7 @@ try {
         'polish-browser.mjs',
         'interface-browser.mjs',
         'audit-browser.mjs',
+        'security-browser.mjs',
         'pages.mjs',
       ];
   for (const file of files) {

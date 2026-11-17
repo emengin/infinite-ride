@@ -136,8 +136,10 @@ export class Game {
     );
     this.setMode('intro');
     if (query.has('debug')) this.ui.toggleDebug();
-    // Read-only observability for regression tests and local diagnostics.
-    if (import.meta.env.DEV || query.has('debug'))
+    // Test control is restricted to development and loopback hosts. Public URLs
+    // cannot expose a mutable test driver through query-string flags.
+    const localHost = ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
+    if (import.meta.env.DEV || (localHost && query.has('debug')))
       Object.defineProperty(window, '__ride', {
         configurable: true,
         value: Object.freeze({
