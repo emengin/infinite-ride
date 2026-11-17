@@ -77,7 +77,13 @@ try {
   });
   await page.locator('#start-button').click();
   await page.keyboard.down('w');
-  await page.waitForTimeout(1600);
+  await page.waitForFunction(
+    () => Number(document.getElementById('speed').textContent) > 10,
+    null,
+    {
+      timeout: 45000,
+    },
+  );
   await page.keyboard.up('w');
   assert.ok(Number(await page.locator('#speed').textContent()) > 10);
   await page.keyboard.press('Escape');

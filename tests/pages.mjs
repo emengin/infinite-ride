@@ -59,7 +59,11 @@ try {
   assert.ok(await page.locator('#error').isHidden());
   await page.locator('#start-button').click();
   await page.keyboard.down('w');
-  await page.waitForTimeout(1200);
+  // Software WebGL in CI renders at a different cadence from a desktop GPU.
+  // Verify the actual gameplay state, without treating this smoke check as FPS QA.
+  await page.waitForFunction(() => window.__ride.snapshot().physics.speed > 5, null, {
+    timeout: 45000,
+  });
   await page.keyboard.up('w');
   const snapshot = await page.evaluate(() => window.__ride.snapshot());
   assert.ok(snapshot.physics.speed > 5);

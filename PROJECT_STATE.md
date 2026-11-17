@@ -25,7 +25,7 @@ Kaynak deposu `emengin/infinite-ride`, planlanan canlı adres `https://emengin.g
 
 Üretim CSP'si dış bağlantıları, satır içi betikleri ve dinamik betik derlemeyi engeller. Test/snapshot API'si yalnızca geliştirme veya loopback hostlarında açılır; genel yayın adresinde query parametreleriyle etkinleşmez. Tarayıcı testleri aynı üretim paketini hem loopback hem genel host davranışıyla doğrular.
 
-Bağımlılıklar kilitlidir. Actions tam commit kimliklerine sabitlenir; checkout kimlik bilgilerini kalıcı tutmaz. Derleme işi yalnızca kaynak okur; Pages yazma ve OIDC yetkisi dağıtım işine aittir. Pull request'ler yayın yapmaz. Ortam dosyaları, anahtarlar, yerel araçlar, test çıktıları ve bağımlılıklar Git'e eklenmez.
+Bağımlılıklar kilitlidir. Actions tam commit kimliklerine sabitlenir; checkout kimlik bilgilerini kalıcı tutmaz. Derleme işi yalnızca kaynak okur; Pages yazma ve OIDC yetkisi dağıtım işine aittir. Pull request'ler yayın yapmaz. Ortam dosyaları, anahtarlar, yerel araçlar, test çıktıları ve bağımlılıklar Git'e eklenmez. GPU'suz CI tarayıcı kontrolleri sabit bir kısa duvar saati beklemesi yerine gerçek sürüş durumunu sınırlı süreyle bekler; FPS ölçümüyle karıştırılmaz.
 
 ## Doğrulama
 
