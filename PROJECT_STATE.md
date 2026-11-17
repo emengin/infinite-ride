@@ -1,12 +1,12 @@
 # INFINITE RIDE — Proje durumu
 
-**17 Kasım 2026 · v1.1.1 · GitHub ve Pages yayını doğrulandı**
+**17 Kasım 2026 · v1.1.1 · Özel alan adı ve HTTPS doğrulandı**
 
 ## Ürün ve sürümler
 
 Tarayıcıda çalışan bağımsız bir 3D motosiklet oyunu. Altı geliştirme aşamasında sonsuz dünya, trafik, Free Ride/Traffic Rush/Race, ses, ayarlar, test ve dağıtım altyapısı tamamlandı. v1.1 arayüzü yeniledi ve oyuncunun otomatik yol takibini kaldırdı. v1.1.1 profesyonel ürün belgeleri, üretim güvenliği ve otomatik yayına odaklanır.
 
-Kaynak deposu [emengin/infinite-ride](https://github.com/emengin/infinite-ride), yeni özel adres [motobike.emengin.dev](https://motobike.emengin.dev/). Kaynak geçmişi korunarak yayınlandı. İlk GitHub Pages adresinde HTTPS, üretim paketi ve üç modun canlı tarayıcı kontrolü başarılı. Özel alan adı geçişinin HTTPS/canlı doğrulaması aşağıdaki kayıtta ayrıca izlenir.
+Kaynak deposu [emengin/infinite-ride](https://github.com/emengin/infinite-ride), canlı adres [motobike.emengin.dev](https://motobike.emengin.dev/). Kaynak geçmişi korunarak yayınlandı. HTTPS, üretim paketi ve üç modun canlı tarayıcı kontrolü hem ilk Pages yayınında hem özel alan adında başarılı. Eski GitHub Pages adresi yeni adrese yönlenir.
 
 ## Mimari
 
@@ -41,7 +41,11 @@ v1.1.0 uzun sürüş kanıtı: 24 simüle dakikada 16.82 km, gerçek zamanlı de
 
 ### Özel alan adı geçişi — 17 Kasım 2026
 
-Kullanıcının seçtiği adres `motobike.emengin.dev` olarak GitHub Pages'e kaydedildi. Cloudflare CNAME kaydı `motobike → emengin.github.io` genel DNS'te doğrulandı. Üretim canonical/Open Graph ve README bağlantıları yeni adrese taşındı. Actions dağıtımı `base: './'` ile devam eder; `CNAME` dosyası kullanılmaz. GitHub sertifikayı onayladı ve zorunlu HTTPS açıldı; sertifikanın uç sunuculara yayılması ve gerçek tarayıcı kontrolü henüz beklemede. İlk yayın testleri özel alan adının testi olarak sunulmaz. Diğer iki oyunun adresleri ve ayarları korunur.
+Kullanıcının seçtiği adres `motobike.emengin.dev` olarak GitHub Pages'e kaydedildi. Cloudflare CNAME kaydı `motobike → emengin.github.io` genel DNS'te doğrulandı. Üretim canonical/Open Graph, README, depo ana sayfası ve sürüm notu bağlantıları yeni adrese taşındı. Actions dağıtımı `base: './'` ile devam eder; `CNAME` dosyası kullanılmaz.
+
+[Özel alan adı yayın iş akışı](https://github.com/emengin/infinite-ride/actions/runs/44047665558) başarılı. Temiz kurulum, 34 Node testi, build, Pages ve dört güvenlik tarayıcı kontrolü geçti. Sertifika normal CA/alan adı doğrulamasıyla kabul edildi ve zorunlu HTTPS açık. HTTP ve eski GitHub Pages adresi yeni HTTPS köküne 301 yönlenir.
+
+Yeni alan adında gerçek Chromium ile Free Ride, Traffic Rush ve Race başlangıç/gaz/kamera/pause/menü döngüsü, ses ayarı, canonical/Open Graph ve üretim test API'sinin kapalı olması doğrulandı. Konsol/runtime/yükleme hatası veya dış alan isteği yoktu. `pong.emengin.dev` ve `roads.emengin.dev` HTTPS 200 döndürdü; GitHub Pages alan adı/HTTPS/yayın türü ayarlarının önceki değerlerle aynı olduğu doğrulandı. Ham kayıtlar yerel `artifacts/infinite-ride-publish/custom-*.json` dosyalarındadır.
 
 Stilize geometri ve arcade fizik kullanılır. Tam rijit cisim/ragdoll, çok şeritli otoyollar ve çevrimiçi çok oyunculu yoktur. Gerçek telefon, Safari/Firefox ve uzun süreli donanım koşulları ayrıca doğrulanmalıdır. Kaynak için ayrıca açık kaynak lisansı atanmadı; üçüncü taraf lisansları korunur.
 

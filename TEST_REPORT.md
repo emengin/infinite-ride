@@ -39,6 +39,19 @@ Canlı sayfada yerel üretimle aynı `index-CZhuqqeF.js` paketi ve CSP doğrulan
 
 Canlı kontrol kayıtları ve ekran görüntüleri yerel `artifacts/infinite-ride-publish/` klasöründe tutulur; kimlik bilgisi veya yerel yayın araçları dağıtım paketine dahil edilmez.
 
+### Özel alan adı — 17 Kasım 2026
+
+Yeni canlı adres [motobike.emengin.dev](https://motobike.emengin.dev/). [44047665558 numaralı yayın](https://github.com/emengin/infinite-ride/actions/runs/44047665558) başarılı. Yerel üretim build'i, Pages alt yol testi ve dört güvenlik senaryosu yeniden geçti; CI ayrıca temiz kurulum, npm audit ve 34 Node testini çalıştırdı.
+
+- Genel DNS'te `motobike.emengin.dev → emengin.github.io` CNAME kaydı doğrulandı.
+- HTTPS 200; normal CA ve alan adı kontrolü açıkken sertifika doğrulandı. Sertifika hatalarını yok sayan seçenek kullanılmadı. GitHub Pages `https_enforced: true`.
+- HTTP adresi ve eski `https://emengin.github.io/infinite-ride/` adresi yeni HTTPS köküne 301 yönlendi.
+- Üretim paketinde canonical, Open Graph sayfa ve görsel adresleri yeni alan adını kullanıyor. Üç mod gerçek klavye girdisiyle tekrar başlatılıp sürüldü; kamera, pause, menü dönüşü ve ses ayarı çalıştı.
+- Yeni genel hostta `?debug=1&test=1` test API'sini açmadı. Konsol/runtime veya başarısız istek yoktu; oyun istekleri aynı alan adında kaldı.
+- Pong ve Gencebay Roads HTTPS 200 döndürdü; her ikisinin Pages alan adı, HTTPS ve yayın türü ayarları değişmedi.
+
+Bu kısa canlı kontrol tam 3 km yarış/uzun sürüş testinin tekrarı olarak sunulmaz. Ayrıntılı sonuçlar `custom-domain-results.json`, `custom-domain-workflow.json` ve `custom-live-results.json` içinde yerel olarak saklanır. Yayınlanan v1.1.1 ZIP'i ilk sürüm anlık görüntüsüdür; içindeki eski oyun bağlantısı da yeni adrese yönlenir.
+
 ## Fizik, yol ve AI kapsamı
 
 - Seed tutarlılığı; 100 km yol sürekliliği ve eğim/eğrilik sınırları.
