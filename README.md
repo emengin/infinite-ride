@@ -4,7 +4,7 @@
 
 Sonsuz yollarda motosiklet sürün, iki yönlü trafikte aralıkları değerlendirin veya yapay zekâ rakiplere karşı yarışın. INFINITE RIDE, dört farklı doğa ortamını üç oyun moduyla birleştiren, doğrudan tarayıcıda oynanabilen bağımsız bir 3D motosiklet oyunudur.
 
-**[Hemen oynayın → INFINITE RIDE](https://emengin.github.io/infinite-ride/)**
+**[Hemen oynayın → INFINITE RIDE](https://motobike.emengin.dev/)**
 
 Hesap, eklenti veya ek oyun kurulumu gerekmez. **Güncel sürüm: 1.1.1.** [Sürüm notları ve indirilebilir paket](https://github.com/emengin/infinite-ride/releases/tag/v1.1.1).
 
@@ -124,6 +124,8 @@ npm run test:e2e
 Vite `base: './'` kullanır; üretim dosyaları kökte veya bir alt klasörde çalışabilir. `main` değişiklikleri GitHub Actions tarafından denetlenir, derlenir, test edilir ve Pages'e yayınlanır. Test/derleme işi yayın yetkisi taşımaz; pull request'ler canlıya dağıtım yapmaz.
 
 GitHub Pages için depo ayarlarında **Pages → Source → GitHub Actions** seçilir. Hazır iş akışı `dist/` klasörünü yayınlar; alternatif bir statik sunucuda da aynı klasörün içeriği kullanılabilir. Sürüm ZIP'i kaynak kodu ve hazır web derlemesini birlikte içerir; masaüstü kurulum dosyası değildir. Paket içindeki `RELEASE_MANIFEST.json` dosya özetlerini, ayrı SHA-256 dosyası ZIP bütünlüğünü doğrulamak için sunulur.
+
+Özel oyun adresi **`motobike.emengin.dev`** olarak yapılandırılır. Cloudflare'da `CNAME` türü, `motobike` adı ve `emengin.github.io` hedefi kullanılır. Kayıt DNS only, TTL Auto'dur. GitHub Pages **Custom domain** aynı tam alan adını kullanır; sertifika hazır olduğunda **Enforce HTTPS** açık tutulur. Actions ile dağıtım yapıldığından ayrıca `CNAME` dosyası gerekmez. `pong.emengin.dev` ve `roads.emengin.dev` ayrı oyun adresleridir; bu kurulum yalnızca `motobike` kaydını kullanır.
 
 ## Varlıklar ve lisanslar
 

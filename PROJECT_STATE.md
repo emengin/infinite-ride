@@ -6,7 +6,7 @@
 
 Tarayıcıda çalışan bağımsız bir 3D motosiklet oyunu. Altı geliştirme aşamasında sonsuz dünya, trafik, Free Ride/Traffic Rush/Race, ses, ayarlar, test ve dağıtım altyapısı tamamlandı. v1.1 arayüzü yeniledi ve oyuncunun otomatik yol takibini kaldırdı. v1.1.1 profesyonel ürün belgeleri, üretim güvenliği ve otomatik yayına odaklanır.
 
-Kaynak deposu [emengin/infinite-ride](https://github.com/emengin/infinite-ride), canlı adres [emengin.github.io/infinite-ride](https://emengin.github.io/infinite-ride/). Kaynak geçmişi korunarak yayınlandı. HTTPS, üretim paketi ve üç modun canlı tarayıcı kontrolü başarılı.
+Kaynak deposu [emengin/infinite-ride](https://github.com/emengin/infinite-ride), yeni özel adres [motobike.emengin.dev](https://motobike.emengin.dev/). Kaynak geçmişi korunarak yayınlandı. İlk GitHub Pages adresinde HTTPS, üretim paketi ve üç modun canlı tarayıcı kontrolü başarılı. Özel alan adı geçişinin HTTPS/canlı doğrulaması aşağıdaki kayıtta ayrıca izlenir.
 
 ## Mimari
 
@@ -38,6 +38,10 @@ GitHub secret scanning, push protection, Dependabot güvenlik güncellemeleri ve
 v1.1.0 uzun sürüş kanıtı: 24 simüle dakikada 16.82 km, gerçek zamanlı devamıyla yaklaşık 17.04 km; sabit 12 parça/56 aktör havuzu ve son 137 geometri/5 doku. Isınma sonrası GC heap aralığı farkı 1.90 MiB; ayrı 12 s RTX 5060/D3D11 ölçümünde yaklaşık 60 FPS. Bu önceki sürüm ölçümüdür; her cihaz veya saatlerce gerçek zamanlı oynanış garantisi değildir.
 
 ## Sınırlar ve devam noktası
+
+### Özel alan adı geçişi — 17 Kasım 2026
+
+Kullanıcının seçtiği adres `motobike.emengin.dev` olarak GitHub Pages'e kaydedildi. Cloudflare CNAME kaydı `motobike → emengin.github.io` genel DNS'te doğrulandı. Üretim canonical/Open Graph ve README bağlantıları yeni adrese taşındı. Actions dağıtımı `base: './'` ile devam eder; `CNAME` dosyası kullanılmaz. GitHub sertifikayı onayladı ve zorunlu HTTPS açıldı; sertifikanın uç sunuculara yayılması ve gerçek tarayıcı kontrolü henüz beklemede. İlk yayın testleri özel alan adının testi olarak sunulmaz. Diğer iki oyunun adresleri ve ayarları korunur.
 
 Stilize geometri ve arcade fizik kullanılır. Tam rijit cisim/ragdoll, çok şeritli otoyollar ve çevrimiçi çok oyunculu yoktur. Gerçek telefon, Safari/Firefox ve uzun süreli donanım koşulları ayrıca doğrulanmalıdır. Kaynak için ayrıca açık kaynak lisansı atanmadı; üçüncü taraf lisansları korunur.
 
