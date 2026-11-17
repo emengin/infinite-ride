@@ -1,12 +1,12 @@
 # INFINITE RIDE — Proje durumu
 
-**17 Kasım 2026 · v1.1.1 · GitHub ve Pages yayın hazırlığı**
+**17 Kasım 2026 · v1.1.1 · GitHub ve Pages yayını doğrulandı**
 
 ## Ürün ve sürümler
 
 Tarayıcıda çalışan bağımsız bir 3D motosiklet oyunu. Altı geliştirme aşamasında sonsuz dünya, trafik, Free Ride/Traffic Rush/Race, ses, ayarlar, test ve dağıtım altyapısı tamamlandı. v1.1 arayüzü yeniledi ve oyuncunun otomatik yol takibini kaldırdı. v1.1.1 profesyonel ürün belgeleri, üretim güvenliği ve otomatik yayına odaklanır.
 
-Kaynak deposu `emengin/infinite-ride`, planlanan canlı adres `https://emengin.github.io/infinite-ride/`. Yayın doğrulaması henüz tamamlanmadı; GitHub iş akışları ve canlı kontrol başarılı olmadan yayın tamamlanmış sayılmamalı.
+Kaynak deposu [emengin/infinite-ride](https://github.com/emengin/infinite-ride), canlı adres [emengin.github.io/infinite-ride](https://emengin.github.io/infinite-ride/). Kaynak geçmişi korunarak yayınlandı. HTTPS, üretim paketi ve üç modun canlı tarayıcı kontrolü başarılı.
 
 ## Mimari
 
@@ -29,7 +29,11 @@ Bağımlılıklar kilitlidir. Actions tam commit kimliklerine sabitlenir; checko
 
 ## Doğrulama
 
-v1.1.1 için 34 Node testi, üretim build'i ve dört üretim güvenlik tarayıcı senaryosu geçti. Dokuz dosyalı tam e2e paketi geçti. `npm audit` bilinen açık bildirmiyor. Kaynak ve tam Git geçmişindeki 143 blob üzerinde anahtar taraması geçti; kişisel bilgisayar yolu bulunmadı. GitHub güvenlik ayarları ve canlı yayın kontrolü tamamlanmalıdır.
+v1.1.1 için 34 Node testi, üretim build'i ve dört üretim güvenlik tarayıcı senaryosu geçti. Dokuz dosyalı tam e2e paketi geçti. `npm audit` bilinen açık bildirmiyor. Kaynak ve yayın öncesi tam Git geçmişindeki 143 blob üzerinde anahtar taraması geçti; kişisel bilgisayar yolu bulunmadı.
+
+[İlk başarılı yayın iş akışı](https://github.com/emengin/infinite-ride/actions/runs/44044933551), temiz kurulum, bağımlılık denetimi, 34 test, üretim build'i, Pages alt-yol testi, güvenlik tarayıcı testi ve dağıtımı tamamladı. Canlı HTTPS adresinde doğru paket yüklendi; Free Ride, Traffic Rush ve Race gerçek klavye gazıyla başlatıldı. Kamera, pause, menü dönüşü ve ses ayarı çalıştı; konsol/runtime/yükleme hatası veya oyun tarafından dış alan isteği görülmedi. Test API'si genel hostta kapalı kaldı.
+
+GitHub secret scanning, push protection, Dependabot güvenlik güncellemeleri ve özel güvenlik bildirimi açıktır. Yayın kontrolünde açık Dependabot ve secret scanning uyarıları sıfırdı. Bu kontroller mutlak güvenlik garantisi olarak yorumlanmaz.
 
 v1.1.0 uzun sürüş kanıtı: 24 simüle dakikada 16.82 km, gerçek zamanlı devamıyla yaklaşık 17.04 km; sabit 12 parça/56 aktör havuzu ve son 137 geometri/5 doku. Isınma sonrası GC heap aralığı farkı 1.90 MiB; ayrı 12 s RTX 5060/D3D11 ölçümünde yaklaşık 60 FPS. Bu önceki sürüm ölçümüdür; her cihaz veya saatlerce gerçek zamanlı oynanış garantisi değildir.
 
@@ -37,4 +41,4 @@ v1.1.0 uzun sürüş kanıtı: 24 simüle dakikada 16.82 km, gerçek zamanlı de
 
 Stilize geometri ve arcade fizik kullanılır. Tam rijit cisim/ragdoll, çok şeritli otoyollar ve çevrimiçi çok oyunculu yoktur. Gerçek telefon, Safari/Firefox ve uzun süreli donanım koşulları ayrıca doğrulanmalıdır. Kaynak için ayrıca açık kaynak lisansı atanmadı; üçüncü taraf lisansları korunur.
 
-Kalan yayın işleri: depoyu oluşturmak, kaynakları göndermek, Pages/güvenlik ayarlarını açmak ve canlı adresi gerçek tarayıcıda doğrulamak. Sonuçlar bu dosya ve TEST_REPORT içinde güncellenir. Diğer oyun depoları bu çalışmanın kapsamında değildir.
+Yayın kabulü tamamlandı. Sonraki bakım işleri gerçek telefon/Safari/Firefox doğrulaması, oyuncu geri bildirimleri ve bağımlılık güncellemeleridir. Sonraki kod değişikliklerinde mevcut regresyon ve üretim güvenlik testleri korunmalıdır. Diğer oyun depoları bu çalışmanın kapsamında değildir.

@@ -6,7 +6,7 @@
 
 | Denetim             | Sonuç                                                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------- |
-| `npm install`       | Başarılı; 19 paket denetlendi, 0 güvenlik açığı bildirildi                                          |
+| `npm ci --ignore-scripts` | Temiz kurulum başarılı; 19 paket denetlendi, 0 güvenlik açığı bildirildi                       |
 | `npm test`          | **34 / 34 geçti**                                                                                   |
 | `npm run build`     | Başarılı; `dist/` hazır                                                                             |
 | `npm run test:e2e`  | Dokuz tarayıcı test dosyası başarılı                                                                |
@@ -28,6 +28,16 @@ Dört yeni tarayıcı senaryosu geçti: genel hostta `?debug=1&test=1` ile test/
 `npm audit` üretim ve geliştirme bağımlılıklarında 0 bilinen açık bildiriyor. Tam Git geçmişindeki 143 blob ve mevcut kaynaklar bilinen erişim/özel anahtar desenleriyle tarandı; eşleşme veya kişisel bilgisayar yolu bulunmadı. Bu desen taraması her olası gizli bilgiyi bulma garantisi değildir. Kimlik bilgileri test veya yayın dosyalarına eklenmedi.
 
 CI eylemleri resmi etiketlerin tam commit kimliklerine sabitlendi. Test/derleme işi yalnızca kaynak okur; Pages ve OIDC yayın yetkileri dağıtım işine ayrıldı. Pull request'ler yayın yapmaz. Ortam/özel anahtar dosyaları ignore kurallarıyla korunur.
+
+## GitHub ve canlı yayın doğrulaması
+
+[GitHub deposu](https://github.com/emengin/infinite-ride) ve [HTTPS oyun adresi](https://emengin.github.io/infinite-ride/) yayınlandı. [44044933551 numaralı iş akışı](https://github.com/emengin/infinite-ride/actions/runs/44044933551) başarılı: temiz kurulum, bağımlılık denetimi, 34 Node testi, build, Chromium Pages ve güvenlik senaryoları, ardından Pages dağıtımı. Linux yazılım WebGL testleri performans karşılaştırması olarak kullanılmaz; gerçek sürüş durumunu sınırlı süreyle bekler.
+
+Canlı sayfada yerel üretimle aynı `index-CZhuqqeF.js` paketi ve CSP doğrulandı. Chromium ile gerçek HTTPS adresinde dört kontrol grubu geçti: üretim yüklemesi/güvenlik ve üç modda klavyeyle başlangıç-gaz-kamera-pause-menü döngüsü. Free Ride içinde ses ayarı da uygulandı. Race geri sayımdan sonra sürüşe geçti; canlı test tam yarış bitişini tekrar ölçmez, bu senaryo yerel e2e paketinde ayrıca geçmiştir.
+
+`?debug=1&test=1` parametreleriyle bile genel hostta test API'si erişilemez. Konsol/runtime hatası veya başarısız istek yoktu; oyunun tüm ağ istekleri kendi Pages yolu altında kaldı. Menü ve yarış görüntüleri görsel olarak incelendi. GitHub Pages HTTPS zorunludur; secret scanning, push protection, Dependabot ve özel güvenlik bildirimleri açıktır. Kontrol anında açık bağımlılık ve gizli anahtar uyarıları sıfırdı.
+
+Canlı kontrol kayıtları ve ekran görüntüleri yerel `artifacts/infinite-ride-publish/` klasöründe tutulur; kimlik bilgisi veya yerel yayın araçları dağıtım paketine dahil edilmez.
 
 ## Fizik, yol ve AI kapsamı
 
@@ -83,9 +93,10 @@ Kalite kontrolünde düzeltilen önemli sorunlar:
 - Yatay mobil menü taşması ve ayar kapatma düğmesinin başlık altında kalması.
 - Oyuncunun kendi kendine sağa/sola yönelmesi: yol eğriliği yardımı oyuncudan kaldırıldı, yalnızca AI'da açıkça etkinleştiriliyor; kamera oyuncu yönüne bakıyor.
 - Yatay menüde yeni dock'un ayar düğmesini örtmesi; 360 px ekranda kamera/fren düğmesi çakışması; sonuç ekranındaki işlevsiz pause düğmesi.
+- GPU'suz CI'da sabit süreli gaz kontrolünün erken ölçüm yapması: Pages ve üretim güvenlik testleri gerçek hız eşiğine ulaşmayı zaman sınırıyla bekler.
 
 ## Sınırlar
 
-Gerçek telefon GPU/ısı/pil koşulları, Safari/Firefox ve saatlerce duvar saati sürüşü test edilmedi. Üretim alt yol testi geçti; canlı Pages doğrulaması yayın kaydında ayrıca belgelenir. İlk Windows headless denemesinde SwiftShader düşük FPS verdi; donanım D3D11 seçilerek ölçüm yapıldı. Her donanım için 60 FPS garantisi verilmez. Fizik arcade ve görseller stilizedir; tam rijit cisim/ragdoll veya fotogerçekçilik doğrulaması iddia edilmez.
+Gerçek telefon GPU/ısı/pil koşulları, Safari/Firefox ve saatlerce duvar saati sürüşü test edilmedi. Üretim alt yol ve canlı Pages kontrolleri geçti. İlk Windows headless denemesinde SwiftShader düşük FPS verdi; donanım D3D11 seçilerek ölçüm yapıldı. Her donanım için 60 FPS garantisi verilmez. Fizik arcade ve görseller stilizedir; tam rijit cisim/ragdoll veya fotogerçekçilik doğrulaması iddia edilmez.
 
 Ham kayıtlar: `browser-results.json`, `world-results.json`, `traffic-results.json`, `modes-results.json`, `polish-results.json`, `interface-results.json`, `audit-results.json`, `pages-results.json`, `security-results.json`, `soak-results.json`.
